@@ -6,15 +6,18 @@ export default function Home() {
 
   const [itemList, setItemList] = useState([]);
 
-  console.log("home called")
+  console.log(itemList)
 
   return (
     <>
       <AddTask onAddTask = { (inputValue) => {
         // Update the state using the previous state
+
+        const item = new ItemClass(itemList.length, null, inputValue);
+
         setItemList(prevItemList => {
           // Create a new array by concatenating the previous items with the new input value
-          return [...prevItemList, inputValue];
+          return [...prevItemList, item];
         });
       }}
       />
@@ -38,9 +41,8 @@ function AddTask({onAddTask}) {
 function List({items}) {
 
   const itemsAsListItems = items.map(item => {
-    return <li> {item} </li>;
+    return <IndividualTask item={item}/>;
   });
-
   
   return (
     <>
@@ -49,5 +51,22 @@ function List({items}) {
       </ul>
     </>
   );
+}
+
+function IndividualTask({item}) {
+
+  return (
+    <li >{item.data}</li>
+  );
+
+}
+
+
+class ItemClass {
+  constructor(id, parentId, data) {
+    this.id = id;
+    this.parentId = parentId;
+    this.data = data;
+  }
 }
 
