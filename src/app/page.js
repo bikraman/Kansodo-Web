@@ -4,9 +4,11 @@ import { useState } from "react";
 
 export default function Home() {
 
-  const [itemList, setItemList] = useState([]);
+  const [itemList, setItemList] = useState([
+    new ItemClass(0,null,"Make Tea"), 
+    new ItemClass(1,null,"Add Events"), 
+    new ItemClass(0,null,"Help my gf")]);
 
-  console.log(itemList)
 
   return (
     <>
@@ -56,7 +58,7 @@ function List({items}) {
 function IndividualTask({item}) {
 
   return (
-    <li >{item.data}</li>
+    <li onMouseMove={() => console.log("mouse moved")}>{item.data}</li>
   );
 
 }
