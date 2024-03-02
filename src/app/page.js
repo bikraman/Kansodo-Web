@@ -7,7 +7,7 @@ export default function Home() {
   const [itemList, setItemList] = useState([
     new ItemClass(0,null,"Make Tea"), 
     new ItemClass(1,null,"Add Events"), 
-    new ItemClass(0,null,"Help my gf")]);
+    new ItemClass(2,null,"Help my brother")]);
 
 
   return (
@@ -35,7 +35,11 @@ function AddTask({onAddTask}) {
   return (
     <>
       <input id="taskInput" type="text" value = {inputValue} onChange={(changeEvent) => setInputValue(changeEvent.target.value)}></input>
-      <button onClick = {() => onAddTask(inputValue)} >Add</button>
+      <button onClick = {() => {
+          onAddTask(inputValue)
+          setInputValue("")
+        }
+      }>Add</button>
     </>
   );
 }
@@ -57,12 +61,19 @@ function List({items}) {
 
 function IndividualTask({item}) {
 
+  const [left, setLeft] = useState(0)
+
   return (
-    <li onMouseMove={() => console.log("mouse moved")}>{item.data}</li>
+    <li 
+      style={{left : `${left}px`}}
+      onMouseMove={(event) => {
+        console.log(`X: ${event.clientX} Y: ${event.clientY }`)
+        setLeft(event.clientX)
+      }
+    }>{item.data}</li>
   );
 
 }
-
 
 class ItemClass {
   constructor(id, parentId, data) {
