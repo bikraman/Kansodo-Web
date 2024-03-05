@@ -1,6 +1,30 @@
+body {
+  background-color: black;
+  color: aliceblue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+button {
+  font-family: 'Montserrat', sans-serif;
+  font-size: small;
+}
+
+
+/* #parent {
+  background-color: aqua;
+} */
+
+input {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400 ;
+}
+
 li {
-  position: relative;
+  position: static;
   padding: 5px;
   margin: 5px;
-  background-color: bisque;
+  font-family: "Inter", sans-serif;
+  font-size: small;
 }

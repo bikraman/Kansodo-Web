@@ -11,20 +11,24 @@ export default function Home() {
 
 
   return (
+
     <>
-      <AddTask onAddTask = { (inputValue) => {
-        // Update the state using the previous state
+      <div id="parent">
+        <AddTask onAddTask = { (inputValue) => {
+          // Update the state using the previous state
 
-        const item = new ItemClass(itemList.length, null, inputValue);
+          const item = new ItemClass(itemList.length, null, inputValue);
 
-        setItemList(prevItemList => {
-          // Create a new array by concatenating the previous items with the new input value
-          return [...prevItemList, item];
-        });
-      }}
-      />
-      <List items = {itemList}/>
+          setItemList(prevItemList => {
+            // Create a new array by concatenating the previous items with the new input value
+            return [...prevItemList, item];
+          });
+        }}
+        />
+        <List items = {itemList}/>
+      </div>
     </>
+
   );
 }
 
