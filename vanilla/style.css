@@ -1,0 +1,26 @@
+/* body {
+    background-color: black;
+    color: white;
+} */
+
+#list {
+    margin-top: 10px;
+    margin-bottom: 10px; 
+} 
+
+.list-item {
+    display: block;
+    padding: 5px;
+}
+
+.list-item-text {
+    display: inline;
+    position: relative;
+    margin: 2px;
+    padding: 5px; /* Adjust padding as needed */
+}
+
+.list-item-delete {
+    position: absolute;
+    right: 20px;
+}
