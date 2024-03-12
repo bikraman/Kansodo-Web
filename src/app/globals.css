@@ -3,7 +3,6 @@ body {
   color: aliceblue;
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
 button {
@@ -19,12 +18,19 @@ button {
 input {
   font-family: 'Montserrat', sans-serif;
   font-weight: 400 ;
+  background-color: black;
+  color: white;
+  font-size: 20px;
+
 }
 
 li {
-  position: static;
   padding: 5px;
-  margin: 5px;
   font-family: "Inter", sans-serif;
-  font-size: small;
+  font-size: 20px;
+}
+
+.help {
+  position: absolute;
+  background-color: brown;
 }

@@ -4,9 +4,19 @@ window.onload = function () {
     console.log("loaded");
 }
 
-document.getElementById("my").addEventListener("mousemove", (event) => {
-    console.log(`client: ${event.clientX} offset: ${event.offsetX}`);
-})
+class ItemClass {
+
+  constructor(id, parentId, data) {
+    this.id = id;
+    this.parentId = parentId;
+    this.data = data;
+    this.isCompleted = false;
+  }
+}
+
+const tasks = [];
+
+
 
 class MyElement extends HTMLElement {
     constructor() {
@@ -46,20 +56,28 @@ const listElement = document.getElementById("list");
 const addButton = document.getElementById("add-button");
 const taskInput = document.getElementById("task-input");
 
-// for(let i = 0; i < 10; i++) {
-//   createListItemAndAdd(String(i))
-// }
+for(let i = 0; i < 10; i++) {
+
+  const id = tasks.length;
+
+  const task = new ItemClass(id , null, "Task " + (id + 1));
+  tasks.push(task);
+
+  createListItemAndAdd(task);
+}
 
 console.log(listElement.innerHTML);
 
 addButton.addEventListener("click", (event) => {
-    tasks.push(taskInput.value);
+
+    const task = new ItemClass(tasks.length + 1, null, taskInput.value);
+    tasks.push(task);
     console.log(tasks);
 
-    createListItemAndAdd(taskInput.value);
+    createListItemAndAdd(task);
 })
 
-function createListItemAndAdd(data) {
+function createListItemAndAdd(task) {
   const listItem = document.createElement("div");
   const text = document.createElement("p")
   const checkbox = document.createElement("input");
@@ -67,7 +85,8 @@ function createListItemAndAdd(data) {
 
   deleteTask.src = "trash-can-regular.svg";
   checkbox.type = "checkbox";
-  text.textContent = data;
+  text.textContent = task.data;
+  text.contentEditable = true;
   // listItem.innerText = data;
   // listItem.innerHTML = "<p class=\"list-item-text\">Hello</p>"
   listItem.className = "list-item";
@@ -75,11 +94,19 @@ function createListItemAndAdd(data) {
   deleteTask.className = "list-item-delete";
 
   listItem.addEventListener("mousemove", (event) => {
-    console.log(event.x);
-    text.style.paddingLeft = `${event.x}px`;
-  })
+    // console.log(event.x);
+    // text.style.paddingLeft = `${event.x}px`;
+  });
 
-  // listItem.addEventListener("")
+  listItem.addEventListener("mouseout", (event) => {
+    // text.style.paddingLeft = "5px";
+  });
+
+  deleteTask.addEventListener("click", (event) => {
+    console.log("deleted!");
+    // tasks.splice(3,1);
+    event.target.parentElement.remove();
+  })
 
   listItem.appendChild(checkbox);
   listItem.appendChild(text);
@@ -87,16 +114,7 @@ function createListItemAndAdd(data) {
   listElement.appendChild(listItem);
 }
 
-const tasks = [];
 
-
-class ItemClass {
-  constructor(id, parentId, data) {
-    this.id = id;
-    this.parentId = parentId;
-    this.data = data;
-  }
-}
 
 
 

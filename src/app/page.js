@@ -1,13 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
 
-  const [itemList, setItemList] = useState([
-    new ItemClass(0,null,"Make Tea"), 
-    new ItemClass(1,null,"Add Events"), 
-    new ItemClass(2,null,"Help my brother")]);
+  let preItems = []
+
+
+  useEffect(() => {
+    // let preItems = []
+
+    // for (let i = 0; i < 1000; i++) {
+    //   preItems.push(new ItemClass(i,null,new String(i)))
+    // }
+
+    // setItemList(preItems);
+  }, []); 
+
+  // const [itemList, setItemList] = useState([
+  //   new ItemClass(0,null,"Make Tea for 24 people in the Seracuz cruise"), 
+  //   new ItemClass(1,null,"Add events to main implementation of project"), 
+  //   new ItemClass(2,null,"Help my brother get his life together")]);
+
+  for (let i = 0; i < 10; i++) {
+    preItems.push(new ItemClass(i,null,new String(i)))
+  }
+
+  const [itemList, setItemList] = useState(preItems);
 
 
   return (
@@ -69,12 +88,11 @@ function IndividualTask({item}) {
 
   return (
     <li 
-      style={{left : `${left}px`}}
-      onMouseMove={(event) => {
-        console.log(`X: ${event.clientX} Y: ${event.clientY }`)
+        onMouseMove={(event) => {
+        console.log(`X: ${event.offsetX} Y: ${event.offsetY }`)
         setLeft(event.clientX)
       }
-    }>{item.data}</li>
+    }><p className = "help" style={{left: `${left}px` }}>{item.data}</p></li>
   );
 
 }
