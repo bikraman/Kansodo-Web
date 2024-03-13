@@ -3,24 +3,30 @@
     color: white;
 } */
 
-#list {
+.list-container {
     margin-top: 10px;
     margin-bottom: 10px; 
 } 
 
 .list-item {
-    display: block;
-    padding: 5px;
+    display: flex;
+    padding: 0px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    flex-direction: row;
 }
 
 .list-item-text {
     display: inline;
-    position: relative;
-    margin: 2px;
-    padding: 5px; /* Adjust padding as needed */
+    margin: 0px;
+    flex-grow: 1;
+    padding: 0px;
+}
+
+.list-item-add-subtask {
+    /* flex-grow: 1; */
 }
 
 .list-item-delete {
-    position: absolute;
-    right: 20px;
+    padding: 0px;
 }

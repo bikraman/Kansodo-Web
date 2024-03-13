@@ -56,15 +56,15 @@ const listElement = document.getElementById("list");
 const addButton = document.getElementById("add-button");
 const taskInput = document.getElementById("task-input");
 
-for(let i = 0; i < 10; i++) {
+// for(let i = 0; i < 10; i++) {
 
-  const id = tasks.length;
+//   const id = tasks.length;
 
-  const task = new ItemClass(id , null, "Task " + (id + 1));
-  tasks.push(task);
+//   const task = new ItemClass(id , null, "Task " + (id + 1));
+//   tasks.push(task);
 
-  createListItemAndAdd(task);
-}
+//   createListItemAndAdd(task);
+// }
 
 console.log(listElement.innerHTML);
 
@@ -78,23 +78,32 @@ addButton.addEventListener("click", (event) => {
 })
 
 function createListItemAndAdd(task) {
+  const listItem = createListItem(task);
+
+  console.log(listItem);
+  listElement.appendChild(listItem);
+}
+
+function createListItem(task) {
   const listItem = document.createElement("div");
   const text = document.createElement("p")
   const checkbox = document.createElement("input");
-  const deleteTask = new Image(20,20);
+  const deleteTask = new Image(15,15);
+  const addSubTask = new Image(15,15);
 
   deleteTask.src = "trash-can-regular.svg";
+  addSubTask.src = "plus-solid.svg";
   checkbox.type = "checkbox";
   text.textContent = task.data;
   text.contentEditable = true;
-  // listItem.innerText = data;
-  // listItem.innerHTML = "<p class=\"list-item-text\">Hello</p>"
+
   listItem.className = "list-item";
   text.className = "list-item-text";
+  addSubTask.className = "list-item-add-subtask";
   deleteTask.className = "list-item-delete";
 
   listItem.addEventListener("mousemove", (event) => {
-    // console.log(event.x);
+    console.log(event.x);
     // text.style.paddingLeft = `${event.x}px`;
   });
 
@@ -102,16 +111,38 @@ function createListItemAndAdd(task) {
     // text.style.paddingLeft = "5px";
   });
 
+  listItem.addEventListener("mouseenter", (event) => {
+    console.log("mouse entered")
+  })
+
   deleteTask.addEventListener("click", (event) => {
     console.log("deleted!");
     // tasks.splice(3,1);
     event.target.parentElement.remove();
   })
 
+  addSubTask.addEventListener("click", (event) => {
+
+    const subListItem = createListItem(new ItemClass(tasks.length + 1, null, "Sub task 0"));
+
+
+    const style = window.getComputedStyle(listItem);
+    const marginLeft = parseFloat(style.marginLeft);
+
+    console.log(marginLeft);
+
+    subListItem.style.marginLeft = `${marginLeft + 15}px`;
+
+    listItem.after(subListItem);
+  })
+
   listItem.appendChild(checkbox);
   listItem.appendChild(text);
-  listItem.appendChild(deleteTask);
-  listElement.appendChild(listItem);
+  listItem.appendChild(addSubTask);
+  // listItem.appendChild(deleteTask);
+
+  return listItem;
+
 }
 
 
