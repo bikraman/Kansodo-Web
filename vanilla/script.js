@@ -36,8 +36,29 @@ request.onsuccess = (event) => {
   db = event.target.result;
 
   const tasksObjectStore = db
-      .transaction("tasks", "readwrite")
+      .transaction("tasks", "readonly")
       .objectStore("tasks");
+
+  tasksObjectStore.openCursor().onsuccess = (event) => {
+
+    const cursor = event.target.result;
+    if (cursor) {
+      console.log(cursor.value);
+      
+      const task = cursor.value //new ItemClass(tasks.length + 1, null, taskInput.value);
+      // tasks.push(task);
+      // console.log(tasks);
+
+      createListItemAndAdd(task);
+
+
+      cursor.continue();
+    } else {
+      console.log("No more entries!");
+    }
+  }
+
+
   tasks.forEach((task) => {
     tasksObjectStore.add(task);
   });
@@ -77,8 +98,6 @@ request.onupgradeneeded = (event) => {
 request.onerror = (event) => {
   console.log("onerror");
 }
-
-
 
 class MyElement extends HTMLElement {
     constructor() {
