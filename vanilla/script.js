@@ -210,6 +210,33 @@ function createListItem(task) {
 
   text.addEventListener("keydown", (event) => {
     if (event.code === "Enter") {
+
+      tasksObjectStore = db
+      .transaction("tasks", "readwrite")
+      .objectStore("tasks");
+  
+      const existingTaskRequest = tasksObjectStore.get(task.id)
+      existingTaskRequest.onsuccess = (event) => {
+        const existingTask = event.target.result;
+
+        console.log(existingTask)
+
+        existingTask.data = text.textContent;
+
+        console.log(existingTask)
+
+
+        const requestUpdate = tasksObjectStore.put(existingTask);
+
+        requestUpdate.onsuccess = () => {
+          console.log("update success")
+        }
+      }
+
+      existingTaskRequest.onerror = (event) => {
+        console.log(event)
+      }
+
       event.preventDefault();
     }
     console.log(`${event.code} from text`);
