@@ -5,6 +5,7 @@ window.onload = function () {
 }
 
 let db;
+let tasksObjectStore;
 
 const request = window.indexedDB.open("list-db", 1);
 
@@ -35,7 +36,7 @@ request.onsuccess = (event) => {
   console.log("onsuccess");
   db = event.target.result;
 
-  const tasksObjectStore = db
+  tasksObjectStore = db
       .transaction("tasks", "readonly")
       .objectStore("tasks");
 
@@ -49,8 +50,9 @@ request.onsuccess = (event) => {
       // tasks.push(task);
       // console.log(tasks);
 
-      createListItemAndAdd(task);
+      tasks.push(task);
 
+      createListItemAndAdd(task);
 
       cursor.continue();
     } else {
@@ -155,14 +157,36 @@ addButton.addEventListener("click", (event) => {
     tasks.push(task);
     console.log(tasks);
 
-    createListItemAndAdd(task);
+    tasksObjectStore = db
+    .transaction("tasks", "readwrite")
+    .objectStore("tasks");
+
+    tasksObjectStore.add(task)
+
+    tasksObjectStore.transaction.oncomplete = () => {
+      createListItemAndAdd(task);
+    }
+
 })
 
 function createListItemAndAdd(task) {
   const listItem = createListItem(task);
 
-  console.log(listItem);
-  listElement.appendChild(listItem);
+  // console.log(listItem);
+
+  if (task.parentId !== null) {
+    const parentItem = document.getElementById(`${task.parentId}`)
+
+    const style = window.getComputedStyle(parentItem);
+    const marginLeft = parseInt(style.marginLeft);
+
+    listItem.style.marginLeft = `${marginLeft + 15}px`;
+    parentItem.after(listItem);
+  }
+  else {
+    listElement.appendChild(listItem);
+  }
+
 }
 
 function createListItem(task) {
@@ -172,11 +196,24 @@ function createListItem(task) {
   const deleteTask = new Image(15,15);
   const addSubTask = new Image(15,15);
 
+  listItem.id = task.id;
+
   deleteTask.src = "trash-can-regular.svg";
   addSubTask.src = "plus-solid.svg";
   checkbox.type = "checkbox";
   text.textContent = task.data;
   text.contentEditable = true;
+
+  listItem.addEventListener("keydown", event => {
+    console.log(`${event.code} from listItem`);
+  })
+
+  text.addEventListener("keydown", (event) => {
+    if (event.code === "Enter") {
+      event.preventDefault();
+    }
+    console.log(`${event.code} from text`);
+  })
 
   listItem.className = "list-item";
   text.className = "list-item-text";
@@ -184,7 +221,7 @@ function createListItem(task) {
   deleteTask.className = "list-item-delete";
 
   listItem.addEventListener("mousemove", (event) => {
-    console.log(event.x);
+    // console.log(event.x);
     // text.style.paddingLeft = `${event.x}px`;
   });
 
@@ -193,7 +230,7 @@ function createListItem(task) {
   });
 
   listItem.addEventListener("mouseenter", (event) => {
-    console.log("mouse entered")
+    // console.log("mouse entered") 
   })
 
   deleteTask.addEventListener("click", (event) => {
@@ -204,17 +241,27 @@ function createListItem(task) {
 
   addSubTask.addEventListener("click", (event) => {
 
-    const subListItem = createListItem(new ItemClass(tasks.length + 1, null, "Sub task 0"));
+    console.log(parseInt(listItem.id))
 
+    const subTask = new ItemClass(tasks.length + 1, parseInt(listItem.id), "Sub task 0")
 
-    const style = window.getComputedStyle(listItem);
-    const marginLeft = parseInt(style.marginLeft);
+    const subListItem = createListItem(subTask);
 
-    console.log(marginLeft);
+    tasksObjectStore = db
+    .transaction("tasks", "readwrite")
+    .objectStore("tasks");
 
-    subListItem.style.marginLeft = `${marginLeft + 15}px`;
+    tasksObjectStore.add(subTask)
 
-    listItem.after(subListItem);
+    tasksObjectStore.transaction.oncomplete = () => {
+      const style = window.getComputedStyle(listItem);
+      const marginLeft = parseInt(style.marginLeft);
+  
+      subListItem.style.marginLeft = `${marginLeft + 15}px`;
+  
+      listItem.after(subListItem);
+    }
+
   })
 
   listItem.appendChild(checkbox);
