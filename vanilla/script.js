@@ -12,6 +12,32 @@ const request = window.indexedDB.open("list-db", 1);
 const tasks = []
 
 
+
+class ObservableTasks {
+
+  constructor(data, onChanged) {
+    this.value = data 
+    this.onChanged = onChanged
+  }
+
+  setValue(data) {
+    this.value = data
+    this.onChanged()
+  }
+
+}
+
+const observableTasks = new ObservableTasks(tasks, () => {
+  console.log("tasks changed!")
+  listElement.textContent = '';
+
+  tasks.forEach((task, index) => {
+    createListItemAndAdd(task)
+  })
+
+})
+
+
 class ItemClass {
 
   constructor(id, parentId, data) {
@@ -61,9 +87,9 @@ request.onsuccess = (event) => {
   }
 
 
-  tasks.forEach((task) => {
-    tasksObjectStore.add(task);
-  });
+  // tasks.forEach((task) => {
+  //   tasksObjectStore.add(task);
+  // });
 
   tasksObjectStore.transaction.oncomplete = (event) => {
     console.log("object store created");
@@ -149,13 +175,13 @@ const taskInput = document.getElementById("task-input");
 //   createListItemAndAdd(task);
 // }
 
+
+
 console.log(listElement.innerHTML);
 
 addButton.addEventListener("click", (event) => {
 
     const task = new ItemClass(tasks.length + 1, null, taskInput.value);
-    tasks.push(task);
-    console.log(tasks);
 
     tasksObjectStore = db
     .transaction("tasks", "readwrite")
@@ -164,7 +190,11 @@ addButton.addEventListener("click", (event) => {
     tasksObjectStore.add(task)
 
     tasksObjectStore.transaction.oncomplete = () => {
-      createListItemAndAdd(task);
+      // createListItemAndAdd(task);
+
+      tasks.push(task);
+
+      observableTasks.setValue(tasks)  
     }
 
 })
@@ -268,7 +298,7 @@ function createListItem(task) {
 
   addSubTask.addEventListener("click", (event) => {
 
-    console.log(parseInt(listItem.id))
+    console.log(tasks.length + 1)
 
     const subTask = new ItemClass(tasks.length + 1, parseInt(listItem.id), "Sub task 0")
 
@@ -285,6 +315,8 @@ function createListItem(task) {
       const marginLeft = parseInt(style.marginLeft);
   
       subListItem.style.marginLeft = `${marginLeft + 15}px`;
+
+      tasks.push(subTask)
   
       listItem.after(subListItem);
     }
