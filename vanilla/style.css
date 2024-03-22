@@ -1,15 +1,22 @@
 body {
     /* background-color: black;
     color: white; */
-
+    font-family: "Geologica", sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
+    left: 20%;
+    right: 20%;
+}
+
+input[type="checkbox"] {
+    accent-color: black;
 }
 
 .list-container {
     margin-top: 10px;
     margin-bottom: 10px; 
+    width: 80%;
 } 
 
 .list-item {
@@ -18,17 +25,34 @@ body {
     margin-top: 5px;
     margin-bottom: 5px;
     flex-direction: row;
+    align-items: center;
+}
+
+.list-item-checkbox {
+    width: 15px;
+    height: 15px;
+    background-color: rgb(0, 0, 0);
 }
 
 .list-item-text {
     display: inline;
     margin: 0px;
+    font-weight: 200;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.list-item-text-area {
     flex-grow: 1;
-    padding: 0px;
+    display: flex;
+    align-items: center;
 }
 
 .list-item-add-subtask {
+    /* padding-left: 10px; */
+    /* display: none; */
     /* flex-grow: 1; */
+    
 }
 
 .list-item-delete {

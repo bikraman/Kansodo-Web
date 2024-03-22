@@ -226,6 +226,8 @@ function createListItem(task) {
   const deleteTask = new Image(15,15);
   const addSubTask = new Image(15,15);
 
+  const textArea = document.createElement("span");
+
   listItem.id = task.id;
 
   deleteTask.src = "trash-can-regular.svg";
@@ -233,6 +235,8 @@ function createListItem(task) {
   checkbox.type = "checkbox";
   text.textContent = task.data;
   text.contentEditable = true;
+
+  checkbox.checked = task.isCompleted;
 
   listItem.addEventListener("keydown", event => {
     console.log(`${event.code} from listItem`);
@@ -272,10 +276,40 @@ function createListItem(task) {
     console.log(`${event.code} from text`);
   })
 
+  checkbox.className = "list-item-checkbox";
   listItem.className = "list-item";
   text.className = "list-item-text";
   addSubTask.className = "list-item-add-subtask";
   deleteTask.className = "list-item-delete";
+  textArea.className = "list-item-text-area";
+
+
+  checkbox.addEventListener("change", (event) => {
+    console.log(event.target.checked);
+
+    const isCompleted = event.target.checked;
+
+    tasksObjectStore = db
+    .transaction("tasks", "readwrite")
+    .objectStore("tasks");
+
+    const existingTaskRequest = tasksObjectStore.get(task.id)
+    existingTaskRequest.onsuccess = (event) => {
+      const existingTask = event.target.result;
+
+      existingTask.isCompleted = isCompleted;
+
+      const requestUpdate = tasksObjectStore.put(existingTask);
+
+      requestUpdate.onsuccess = () => {
+        console.log("update success")
+      }
+    }
+
+    existingTaskRequest.onerror = (event) => {
+      console.log(event)
+    }
+  })
 
   listItem.addEventListener("mousemove", (event) => {
     // console.log(event.x);
@@ -323,10 +357,12 @@ function createListItem(task) {
 
   })
 
+  textArea.appendChild(text);
+  textArea.appendChild(addSubTask);
+
   listItem.appendChild(checkbox);
-  listItem.appendChild(text);
-  listItem.appendChild(addSubTask);
-  // listItem.appendChild(deleteTask);
+  listItem.appendChild(textArea);
+  listItem.appendChild(deleteTask);
 
   return listItem;
 
