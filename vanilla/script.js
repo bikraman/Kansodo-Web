@@ -68,6 +68,8 @@ request.onsuccess = (event) => {
 
   tasksObjectStore.openCursor().onsuccess = (event) => {
 
+    console.log(event)
+
     const cursor = event.target.result;
     if (cursor) {
       console.log(cursor.value);
@@ -81,10 +83,32 @@ request.onsuccess = (event) => {
       createListItemAndAdd(task);
 
       cursor.continue();
-    } else {
+    } else if (cursor === null) {
+    }
+    else {
       console.log("No more entries!");
     }
+
+    if (tasks.length === 0) {
+
+      const emptyTask = new ItemClass(1, null, "Write your first task");
+
+      const newTasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+
+      newTasksObjectStore.add(emptyTask)
+
+      newTasksObjectStore.transaction.onsuccess = () => {
+        tasks.push(emptyTask)
+
+        createListItemAndAdd(emptyTask);
+      }
+
+
+
+    }
   }
+
+
 
 
   // tasks.forEach((task) => {
@@ -210,7 +234,7 @@ function createListItemAndAdd(task) {
     const style = window.getComputedStyle(parentItem);
     const marginLeft = parseInt(style.marginLeft);
 
-    listItem.style.marginLeft = `${marginLeft + 15}px`;
+    listItem.style.marginLeft = `${marginLeft + 30}px`;
     parentItem.after(listItem);
   }
   else {
@@ -283,11 +307,22 @@ function createListItem(task) {
   deleteTask.className = "list-item-delete";
   textArea.className = "list-item-text-area";
 
+  if (task.isCompleted) 
+    text.style.textDecoration = "line-through";
+  else 
+    text.style.textDecoration = "none";
+
 
   checkbox.addEventListener("change", (event) => {
     console.log(event.target.checked);
 
     const isCompleted = event.target.checked;
+
+    if (isCompleted) 
+      text.style.textDecoration = "line-through";
+    else 
+      text.style.textDecoration = "none";
+      
 
     tasksObjectStore = db
     .transaction("tasks", "readwrite")
