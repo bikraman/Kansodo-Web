@@ -307,6 +307,8 @@ function createListItem(task) {
   deleteTask.className = "list-item-delete";
   textArea.className = "list-item-text-area";
 
+  text.spellcheck = false;
+
   if (task.isCompleted) 
     text.style.textDecoration = "line-through";
   else 
@@ -383,7 +385,7 @@ function createListItem(task) {
       const style = window.getComputedStyle(listItem);
       const marginLeft = parseInt(style.marginLeft);
   
-      subListItem.style.marginLeft = `${marginLeft + 15}px`;
+      subListItem.style.marginLeft = `${marginLeft + 30}px`;
 
       tasks.push(subTask)
   
