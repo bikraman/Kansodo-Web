@@ -7,11 +7,9 @@ window.onload = function () {
 let db;
 let tasksObjectStore;
 
-const request = window.indexedDB.open("list-db", 1);
+const request = window.indexedDB.open("list-db", 3);
 
 const tasks = []
-
-
 
 class ObservableTasks {
 
@@ -45,6 +43,7 @@ class ItemClass {
     this.parentId = parentId;
     this.data = data;
     this.isCompleted = false;
+    this.dateAdded = new Date();
   }
 }
 
@@ -131,12 +130,12 @@ request.onupgradeneeded = (event) => {
 
   const objectStore = db.createObjectStore("tasks", { keyPath: "id" });
   objectStore.createIndex("id", "id", { unique: true , autoIncrement: true});
-  objectStore.createIndex("parent_id", "parent_id", { unique: false })
+  objectStore.createIndex("parentId", "parentId", { unique: false })
 
   // Create an index to search customers by email. We want to ensure that
   // no two customers have the same email, so use a unique index.
-  objectStore.createIndex("task", "task", { unique: false });
-  objectStore.createIndex("is_completed", "is_completed", { unique: false });
+  objectStore.createIndex("data", "data", { unique: false });
+  objectStore.createIndex("dateAdded", "dateAdded", { unique: true });
 
   objectStore.transaction.oncomplete = (event) => {
     console.log("object store created");
