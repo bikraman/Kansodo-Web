@@ -272,6 +272,7 @@ function createListItem(task) {
       .transaction("tasks", "readwrite")
       .objectStore("tasks");
   
+
       const existingTaskRequest = tasksObjectStore.get(task.id)
       existingTaskRequest.onsuccess = (event) => {
         const existingTask = event.target.result;
@@ -363,6 +364,28 @@ function createListItem(task) {
   deleteTask.addEventListener("click", (event) => {
     console.log("deleted!");
     // tasks.splice(3,1);
+
+    const tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+    tasksObjectStore.delete(task.id)
+    const tagIndex = tasksObjectStore.index("parentId")
+    var pdestroy = tagIndex.openKeyCursor(); 
+    pdestroy.onsuccess = function(event) {
+      const cursor = event.target.result;
+      if (cursor) {
+
+          console.log(cursor.key)
+          tasksObjectStore.delete(cursor.primaryKey);
+          cursor.continue();
+      }
+    }
+
+
+    // tasksObjectStore.index("parentId").onsuccess = () => {
+
+    // };
+
+
+
     event.target.parentElement.remove();
   })
 
