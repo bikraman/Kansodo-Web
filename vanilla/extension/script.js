@@ -123,6 +123,7 @@ request.onsuccess = (event) => {
   }
 }
 
+
 request.onupgradeneeded = (event) => {
   console.log("onupgradeneeded");
 
@@ -366,15 +367,17 @@ function createListItem(task) {
     // tasks.splice(3,1);
 
     const tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
-    tasksObjectStore.delete(task.id)
     const tagIndex = tasksObjectStore.index("parentId")
+    tasksObjectStore.delete(task.id);
     var pdestroy = tagIndex.openKeyCursor(); 
     pdestroy.onsuccess = function(event) {
       const cursor = event.target.result;
       if (cursor) {
 
-          console.log(cursor.key)
-          tasksObjectStore.delete(cursor.primaryKey);
+          if(cursor.key === task.id) {
+            console.log(cursor.key)
+            tasksObjectStore.delete(cursor.primaryKey);
+          }
           cursor.continue();
       }
     }
