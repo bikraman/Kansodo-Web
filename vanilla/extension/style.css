@@ -63,7 +63,6 @@ input[type="checkbox"] {
 
 .list-item-child-holder {
     /* display: block; */
-    background-color: aqua;
 }
 
 .list-item-text[contenteditable ="true"] {

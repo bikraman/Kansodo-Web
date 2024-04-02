@@ -226,8 +226,7 @@ function createListItemAndAdd(task) {
     const style = window.getComputedStyle(parentItem);
     const marginLeft = parseInt(style.marginLeft);
 
-    listItem.style.marginLeft = `${marginLeft + 30}px`;
-
+    listItem.style.marginLeft = `${marginLeft + 20}px`;
 
     const child = document.createElement("div")
     child.className = "list-item-child-holder"
@@ -404,10 +403,10 @@ function createListItem(task) {
     tasksObjectStore.add(subTask)
 
     tasksObjectStore.transaction.oncomplete = () => {
-      const style = window.getComputedStyle(listItem);
+      const style = window.getComputedStyle(listItemContainer);
       const marginLeft = parseInt(style.marginLeft);
   
-      subListItem.style.marginLeft = `${marginLeft + 30}px`;
+      subListItem.style.marginLeft = `${marginLeft + 20}px`;
 
       const child = document.createElement("div")
       child.className = "list-item-child-holder"
