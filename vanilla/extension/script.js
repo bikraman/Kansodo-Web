@@ -31,6 +31,7 @@ class ItemClass {
     this.parentId = parentId;
     this.data = data;
     this.isCompleted = false;
+    this.isExpanded = true;
     this.dateAdded = new Date();
   }
 }
@@ -353,6 +354,31 @@ function createListItem(task) {
       console.log(event)
     }
   })
+
+  listItem.addEventListener("dblclick", event => {
+    console.log("double click")
+
+    const store = db.transaction("tasks", "readwrite").objectStore("tasks")
+    
+    if (task.isExpanded || task.isExpanded === undefined) {
+      const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
+      console.log(childHolder)
+      for (let item of childHolder) {
+        item.style.display = "none";
+      }
+      task.isExpanded = false
+    }
+    else {
+      const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
+      console.log(childHolder)
+      for (let item of childHolder) {
+        item.style.display = "block";
+      }
+      task.isExpanded = true
+    }
+
+    
+  });
 
   listItem.addEventListener("mousemove", (event) => {
     // console.log(event.x);
