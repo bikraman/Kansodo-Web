@@ -1,5 +1,7 @@
 "use strict";
 
+
+
 window.onload = function () {
     console.log("loaded");
 }
@@ -9,31 +11,17 @@ let tasksObjectStore;
 
 const request = window.indexedDB.open("list-db", 3);
 
-const tasks = []
+class TaskNode {
 
-class ObservableTasks {
-
-  constructor(data, onChanged) {
-    this.value = data 
-    this.onChanged = onChanged
+  constructor(value) {
+    this.children = []
+    this.value = value
   }
 
-  setValue(data) {
-    this.value = data
-    this.onChanged()
+  addChild(node) {
+    this.children.push(node)
   }
-
 }
-
-const observableTasks = new ObservableTasks(tasks, () => {
-  console.log("tasks changed!")
-  listElement.textContent = '';
-
-  tasks.forEach((task, index) => {
-    createListItemAndAdd(task)
-  })
-
-})
 
 
 class ItemClass {
@@ -56,6 +44,8 @@ class ItemClass {
 // tasks.push(new ItemClass(5, 1, "Implement user authentication system"));
 // tasks.push(new ItemClass(6, 1, "Design user interface for the dashboard"));
 
+const root = new TaskNode(new ItemClass(20, null, "Write something"))
+
 
 request.onsuccess = (event) => {
   console.log("onsuccess");
@@ -65,54 +55,38 @@ request.onsuccess = (event) => {
       .transaction("tasks", "readonly")
       .objectStore("tasks");
 
-  tasksObjectStore.openCursor().onsuccess = (event) => {
-
-    console.log(event)
+  tasksObjectStore.index("dateAdded").openCursor().onsuccess = (event) => {
 
     const cursor = event.target.result;
     if (cursor) {
-      console.log(cursor.value);
-      
-      const task = cursor.value //new ItemClass(tasks.length + 1, null, taskInput.value);
-      // tasks.push(task);
-      // console.log(tasks);
+      const task = cursor.value;
 
-      tasks.push(task);
-
-      createListItemAndAdd(task);
-
+      addToTree(task);
       cursor.continue();
-    } else if (cursor === null) {
     }
     else {
       console.log("No more entries!");
+      console.log(root)
+      displayTree(root)
     }
 
-    if (tasks.length === 0) {
 
-      const emptyTask = new ItemClass(1, null, "Write your first task");
+    // if (tasks.length === 0) {
 
-      const newTasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+    //   const emptyTask = new ItemClass(1, null, "Write your first task");
 
-      newTasksObjectStore.add(emptyTask)
+    //   const newTasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
 
-      newTasksObjectStore.transaction.onsuccess = () => {
-        tasks.push(emptyTask)
+    //   newTasksObjectStore.add(emptyTask)
 
-        createListItemAndAdd(emptyTask);
-      }
+    //   newTasksObjectStore.transaction.onsuccess = () => {
+    //     tasks.push(emptyTask)
 
-
-
-    }
+    //     createListItemAndAdd(emptyTask);
+    //   }
+    // }
   }
 
-
-
-
-  // tasks.forEach((task) => {
-  //   tasksObjectStore.add(task);
-  // });
 
   tasksObjectStore.transaction.oncomplete = (event) => {
     console.log("object store created");
@@ -123,14 +97,62 @@ request.onsuccess = (event) => {
   }
 }
 
+function displayTree(node) {
+
+  if (node === null) 
+    return;
+
+  createListItemAndAdd(node.value)
+
+  for (let child of node.children) {
+      displayTree(child);
+  }
+}
+
+function searchInTree(node, target) {
+
+  if (node === null) {
+      return false;
+  }
+
+  if (node.value === null) {
+      return false;
+  }
+  
+  if (node.value.id === target.parentId) {
+      node.addChild(new TaskNode(target));
+      return true;
+  }
+  
+  for (let child of node.children) {
+      if (searchInTree(child, target)) {
+          return true;
+      }
+  }
+  
+  return false;
+}
+
+
+function addToTree(task) {
+
+  if (task.parentId === null) {
+    root.addChild(new TaskNode(task))
+  }
+  else {
+    searchInTree(root, task)
+  }
+
+}
+
 
 request.onupgradeneeded = (event) => {
   console.log("onupgradeneeded");
 
   db = event.target.result;
 
-  const objectStore = db.createObjectStore("tasks", { keyPath: "id" });
-  objectStore.createIndex("id", "id", { unique: true , autoIncrement: true});
+  const objectStore = db.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
+  objectStore.createIndex("id", "id", { unique: true });
   objectStore.createIndex("parentId", "parentId", { unique: false })
 
   // Create an index to search customers by email. We want to ensure that
@@ -151,61 +173,37 @@ request.onerror = (event) => {
   console.log("onerror");
 }
 
-class MyElement extends HTMLElement {
-    constructor() {
-      super();
-      // element created
-    }
-  
-    connectedCallback() {
-      // browser calls this method when the element is added to the document
-      // (can be called many times if an element is repeatedly added/removed)
-    }
-  
-    disconnectedCallback() {
-      // browser calls this method when the element is removed from the document
-      // (can be called many times if an element is repeatedly added/removed)
-    }
-  
-    static get observedAttributes() {
-      return [/* array of attribute names to monitor for changes */];
-    }
-  
-    attributeChangedCallback(name, oldValue, newValue) {
-      // called when one of attributes listed above is modified
-    }
-  
-    adoptedCallback() {
-      // called when the element is moved to a new document
-      // (happens in document.adoptNode, very rarely used)
-    }
-  
-    // there can be other element methods and properties
-}
-
-customElements.define("my-element", MyElement);
-
 const listElement = document.getElementById("list");
 const addButton = document.getElementById("add-button");
 const taskInput = document.getElementById("task-input");
 
-// for(let i = 0; i < 10; i++) {
+function generateUUID() {
+  // Generate random bytes
+  const cryptoObj = window.crypto || window.msCrypto; // for IE11 compatibility
+  const buffer = new Uint8Array(16);
+  cryptoObj.getRandomValues(buffer);
 
-//   const id = tasks.length;
+  // Set version (4) and variant (RFC4122) bits
+  buffer[6] = (buffer[6] & 0x0f) | 0x40; // Version 4
+  buffer[8] = (buffer[8] & 0x3f) | 0x80; // Variant RFC4122
 
-//   const task = new ItemClass(id , null, "Task " + (id + 1));
-//   tasks.push(task);
+  // Convert bytes to hexadecimal string
+  let uuid = '';
+  for (let i = 0; i < 16; i++) {
+    let byte = buffer[i].toString(16);
+    if (byte.length === 1) byte = '0' + byte;
+    uuid += byte;
+    if ([3, 5, 7, 9].includes(i)) uuid += '-';
+  }
 
-//   createListItemAndAdd(task);
-// }
+  return uuid;
+}
 
-
-
-console.log(listElement.innerHTML);
 
 addButton.addEventListener("click", (event) => {
 
-    const task = new ItemClass(tasks.length + 1, null, taskInput.value);
+
+    const task = new ItemClass(generateUUID(), null, taskInput.value);
 
     tasksObjectStore = db
     .transaction("tasks", "readwrite")
@@ -214,11 +212,7 @@ addButton.addEventListener("click", (event) => {
     tasksObjectStore.add(task)
 
     tasksObjectStore.transaction.oncomplete = () => {
-      // createListItemAndAdd(task);
-
-      tasks.push(task);
-
-      observableTasks.setValue(tasks)  
+      createListItemAndAdd(task);
     }
 
 })
@@ -226,16 +220,20 @@ addButton.addEventListener("click", (event) => {
 function createListItemAndAdd(task) {
   const listItem = createListItem(task);
 
-  // console.log(listItem);
-
   if (task.parentId !== null) {
     const parentItem = document.getElementById(`${task.parentId}`)
 
     const style = window.getComputedStyle(parentItem);
     const marginLeft = parseInt(style.marginLeft);
 
-    listItem.style.marginLeft = `${marginLeft + 30}px`;
-    parentItem.after(listItem);
+    listItem.style.marginLeft = `${marginLeft + 20}px`;
+
+    const child = document.createElement("div")
+    child.className = "list-item-child-holder"
+    child.appendChild(listItem)
+
+    parentItem.appendChild(child);
+
   }
   else {
     listElement.appendChild(listItem);
@@ -244,6 +242,7 @@ function createListItemAndAdd(task) {
 }
 
 function createListItem(task) {
+  const listItemContainer = document.createElement("div")
   const listItem = document.createElement("div");
   const text = document.createElement("p")
   const checkbox = document.createElement("input");
@@ -252,13 +251,24 @@ function createListItem(task) {
 
   const textArea = document.createElement("span");
 
-  listItem.id = task.id;
+  listItem.draggable = true;
+
+  listItemContainer.id = task.id;
 
   deleteTask.src = "trash-can-regular.svg";
   addSubTask.src = "plus-solid.svg";
   checkbox.type = "checkbox";
   text.textContent = task.data;
   text.contentEditable = true;
+
+  listItemContainer.className = "list-item-container"
+
+  checkbox.className = "list-item-checkbox";
+  listItem.className = "list-item";
+  text.className = "list-item-text";
+  addSubTask.className = "list-item-add-subtask";
+  deleteTask.className = "list-item-delete";
+  textArea.className = "list-item-text-area";
 
   checkbox.checked = task.isCompleted;
 
@@ -301,12 +311,7 @@ function createListItem(task) {
     console.log(`${event.code} from text`);
   })
 
-  checkbox.className = "list-item-checkbox";
-  listItem.className = "list-item";
-  text.className = "list-item-text";
-  addSubTask.className = "list-item-add-subtask";
-  deleteTask.className = "list-item-delete";
-  textArea.className = "list-item-text-area";
+
 
   text.spellcheck = false;
 
@@ -382,21 +387,12 @@ function createListItem(task) {
       }
     }
 
-
-    // tasksObjectStore.index("parentId").onsuccess = () => {
-
-    // };
-
-
-
     event.target.parentElement.remove();
   })
 
   addSubTask.addEventListener("click", (event) => {
 
-    console.log(tasks.length + 1)
-
-    const subTask = new ItemClass(tasks.length + 1, parseInt(listItem.id), "Sub task 0")
+    const subTask = new ItemClass(generateUUID(), listItemContainer.id, "Sub task 0")
 
     const subListItem = createListItem(subTask);
 
@@ -407,14 +403,17 @@ function createListItem(task) {
     tasksObjectStore.add(subTask)
 
     tasksObjectStore.transaction.oncomplete = () => {
-      const style = window.getComputedStyle(listItem);
+      const style = window.getComputedStyle(listItemContainer);
       const marginLeft = parseInt(style.marginLeft);
   
-      subListItem.style.marginLeft = `${marginLeft + 30}px`;
+      subListItem.style.marginLeft = `${marginLeft + 20}px`;
 
-      tasks.push(subTask)
-  
-      listItem.after(subListItem);
+      const child = document.createElement("div")
+      child.className = "list-item-child-holder"
+      child.appendChild(subListItem)
+
+
+      listItemContainer.appendChild(child);
     }
 
   })
@@ -426,7 +425,9 @@ function createListItem(task) {
   listItem.appendChild(textArea);
   listItem.appendChild(deleteTask);
 
-  return listItem;
+  listItemContainer.appendChild(listItem)
+
+  return listItemContainer;
 
 }
 
