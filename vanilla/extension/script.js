@@ -31,6 +31,7 @@ class ItemClass {
     this.parentId = parentId;
     this.data = data;
     this.isCompleted = false;
+    this.isExpanded = true;
     this.dateAdded = new Date();
   }
 }
@@ -228,11 +229,8 @@ function createListItemAndAdd(task) {
 
     listItem.style.marginLeft = `${marginLeft + 20}px`;
 
-    const child = document.createElement("div")
-    child.className = "list-item-child-holder"
-    child.appendChild(listItem)
-
-    parentItem.appendChild(child);
+    const childs = parentItem.children
+    childs[1].append(listItem)
 
   }
   else {
@@ -249,6 +247,8 @@ function createListItem(task) {
   const deleteTask = new Image(15,15);
   const addSubTask = new Image(15,15);
 
+  const listSubTasksHolder = document.createElement("div")
+
   const textArea = document.createElement("span");
 
   listItem.draggable = true;
@@ -261,7 +261,9 @@ function createListItem(task) {
   text.textContent = task.data;
   text.contentEditable = true;
 
-  listItemContainer.className = "list-item-container"
+  listItemContainer.className = "list-item-container";
+
+  listSubTasksHolder.className = "list-item-child-holder";
 
   checkbox.className = "list-item-checkbox";
   listItem.className = "list-item";
@@ -354,6 +356,42 @@ function createListItem(task) {
     }
   })
 
+  listItem.addEventListener("dblclick", event => {
+    console.log("double click")
+
+    const store = db.transaction("tasks", "readwrite").objectStore("tasks")
+    
+    if (task.isExpanded || task.isExpanded === undefined) {
+
+      store.get(task.id).onsuccess = (event) => {
+          const obj = event.target.result
+
+          obj.isExpanded = false;
+
+          store.put(obj).onsuccess = () => {
+            listSubTasksHolder.style.display = "none"
+            task.isExpanded = false
+          }
+      }
+
+    }
+    else {
+
+      store.get(task.id).onsuccess = (event) => {
+        const obj = event.target.result;
+
+        obj.isExpanded = true;
+
+        store.put(obj).onsuccess = () => {
+          listSubTasksHolder.style.display = "block";
+          task.isExpanded = true;
+        }
+      }
+    }
+
+    
+  });
+
   listItem.addEventListener("mousemove", (event) => {
     // console.log(event.x);
     // text.style.paddingLeft = `${event.x}px`;
@@ -408,15 +446,16 @@ function createListItem(task) {
   
       subListItem.style.marginLeft = `${marginLeft + 20}px`;
 
-      const child = document.createElement("div")
-      child.className = "list-item-child-holder"
-      child.appendChild(subListItem)
+      const childs = listItemContainer.children
+      childs[1].append(subListItem)
 
-
-      listItemContainer.appendChild(child);
     }
-
   })
+
+
+  if (!task.isExpanded) {
+      listSubTasksHolder.style.display = "none";
+  } 
 
   textArea.appendChild(text);
   textArea.appendChild(addSubTask);
@@ -426,6 +465,7 @@ function createListItem(task) {
   listItem.appendChild(deleteTask);
 
   listItemContainer.appendChild(listItem)
+  listItemContainer.appendChild(listSubTasksHolder)
 
   return listItemContainer;
 
