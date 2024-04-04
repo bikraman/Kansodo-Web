@@ -229,11 +229,18 @@ function createListItemAndAdd(task) {
 
     listItem.style.marginLeft = `${marginLeft + 20}px`;
 
-    const child = document.createElement("div")
-    child.className = "list-item-child-holder"
-    child.appendChild(listItem)
+    const childs = parentItem.children
 
-    parentItem.appendChild(child);
+    if (childs[1] === undefined) {
+      const child = document.createElement("div")
+      child.className = "list-item-child-holder"
+      child.appendChild(listItem)
+  
+      parentItem.appendChild(child);
+    }
+    else {
+      childs[1].append(listItem)
+    }
 
   }
   else {
@@ -361,12 +368,21 @@ function createListItem(task) {
     const store = db.transaction("tasks", "readwrite").objectStore("tasks")
     
     if (task.isExpanded || task.isExpanded === undefined) {
-      const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
-      console.log(childHolder)
-      for (let item of childHolder) {
-        item.style.display = "none";
+
+      store.get(task.id).onsuccess = (event) => {
+          const obj = event.target.result
+
+          obj.isExpanded = false;
+
+          store.put(obj).onsuccess = () => {
+            const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
+            for (let item of childHolder) {
+              item.style.display = "none";
+            }
+            task.isExpanded = false
+          }
       }
-      task.isExpanded = false
+
     }
     else {
       const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
@@ -434,15 +450,33 @@ function createListItem(task) {
   
       subListItem.style.marginLeft = `${marginLeft + 20}px`;
 
-      const child = document.createElement("div")
-      child.className = "list-item-child-holder"
-      child.appendChild(subListItem)
+      const childs = listItemContainer.children
+
+      if (childs[1] === undefined) {
+        const child = document.createElement("div")
+        child.className = "list-item-child-holder"
+        child.appendChild(subListItem)
+  
+  
+        listItemContainer.appendChild(child);
+      }
+      else {
+        childs[1].append(subListItem)
+      }
 
 
-      listItemContainer.appendChild(child);
     }
 
   })
+
+  console.log(task.isExpanded)
+
+  if (task.isExpanded === false) {
+    const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
+    for (let item of childHolder) {
+      item.hidden = true;
+    }
+  } 
 
   textArea.appendChild(text);
   textArea.appendChild(addSubTask);
