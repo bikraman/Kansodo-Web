@@ -230,17 +230,7 @@ function createListItemAndAdd(task) {
     listItem.style.marginLeft = `${marginLeft + 20}px`;
 
     const childs = parentItem.children
-
-    if (childs[1] === undefined) {
-      const child = document.createElement("div")
-      child.className = "list-item-child-holder"
-      child.appendChild(listItem)
-  
-      parentItem.appendChild(child);
-    }
-    else {
-      childs[1].append(listItem)
-    }
+    childs[1].append(listItem)
 
   }
   else {
@@ -257,6 +247,8 @@ function createListItem(task) {
   const deleteTask = new Image(15,15);
   const addSubTask = new Image(15,15);
 
+  const listSubTasksHolder = document.createElement("div")
+
   const textArea = document.createElement("span");
 
   listItem.draggable = true;
@@ -269,7 +261,9 @@ function createListItem(task) {
   text.textContent = task.data;
   text.contentEditable = true;
 
-  listItemContainer.className = "list-item-container"
+  listItemContainer.className = "list-item-container";
+
+  listSubTasksHolder.className = "list-item-child-holder";
 
   checkbox.className = "list-item-checkbox";
   listItem.className = "list-item";
@@ -375,22 +369,24 @@ function createListItem(task) {
           obj.isExpanded = false;
 
           store.put(obj).onsuccess = () => {
-            const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
-            for (let item of childHolder) {
-              item.style.display = "none";
-            }
+            listSubTasksHolder.style.display = "none"
             task.isExpanded = false
           }
       }
 
     }
     else {
-      const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
-      console.log(childHolder)
-      for (let item of childHolder) {
-        item.style.display = "block";
+
+      store.get(task.id).onsuccess = (event) => {
+        const obj = event.target.result;
+
+        obj.isExpanded = true;
+
+        store.put(obj).onsuccess = () => {
+          listSubTasksHolder.style.display = "block";
+          task.isExpanded = true;
+        }
       }
-      task.isExpanded = true
     }
 
     
@@ -451,31 +447,14 @@ function createListItem(task) {
       subListItem.style.marginLeft = `${marginLeft + 20}px`;
 
       const childs = listItemContainer.children
-
-      if (childs[1] === undefined) {
-        const child = document.createElement("div")
-        child.className = "list-item-child-holder"
-        child.appendChild(subListItem)
-  
-  
-        listItemContainer.appendChild(child);
-      }
-      else {
-        childs[1].append(subListItem)
-      }
-
+      childs[1].append(subListItem)
 
     }
-
   })
 
-  console.log(task.isExpanded)
 
-  if (task.isExpanded === false) {
-    const childHolder = listItemContainer.getElementsByClassName("list-item-child-holder")
-    for (let item of childHolder) {
-      item.hidden = true;
-    }
+  if (!task.isExpanded) {
+      listSubTasksHolder.style.display = "none";
   } 
 
   textArea.appendChild(text);
@@ -486,6 +465,7 @@ function createListItem(task) {
   listItem.appendChild(deleteTask);
 
   listItemContainer.appendChild(listItem)
+  listItemContainer.appendChild(listSubTasksHolder)
 
   return listItemContainer;
 
