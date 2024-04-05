@@ -388,13 +388,48 @@ function createListItem(task) {
         }
       }
     }
-
-    
   });
+
+  let longPress = false
+
+  listItem.addEventListener("mousedown", event => {
+    console.log("mousedown")
+    longPress = true;
+    setTimeout(() => {
+      if (longPress) {
+        console.log("long pressed")
+        listItem.style.visibility = "none"
+
+      }
+    }, 1000)
+  });
+
+  let style = null;
+
+  listItem.addEventListener("dragstart", event => {
+    setTimeout(() => {
+      listItem.style.display = "none"
+    }, 0)
+  })
+
+  listItem.addEventListener("drag", event => {
+    console.log("dragging")
+    // listItem.style.display = "none"
+
+  })
+
+  listItem.addEventListener("dragend", event => {
+    console.log("drag end")
+    listItem.style.display = "flex"
+  })
 
   listItem.addEventListener("mousemove", (event) => {
     // console.log(event.x);
     // text.style.paddingLeft = `${event.x}px`;
+  });
+
+  listItem.addEventListener("mouseup", event => {
+    longPress = false;
   });
 
   listItem.addEventListener("mouseout", (event) => {
