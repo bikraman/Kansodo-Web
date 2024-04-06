@@ -31,6 +31,7 @@ class ItemClass {
     this.id = id;
     this.parentId = parentId;
     this.data = data;
+    this.sortOrder = 0;
     this.isCompleted = false;
     this.isExpanded = true;
     this.dateAdded = new Date();
@@ -69,6 +70,8 @@ request.onsuccess = (event) => {
     else {
       console.log("No more entries!");
       console.log(root)
+
+      sortTree(root)
       displayTree(root)
     }
 
@@ -97,6 +100,21 @@ request.onsuccess = (event) => {
   tasksObjectStore.transaction.onerror = (event) => {
     console.log(event.target.error.message);
   }
+}
+
+function sortTree(node) {
+
+  if (node.value === undefined)
+    return;
+
+  if(node.children.length === 0)
+    return;
+
+  for(let i = 0; i < node.children.length; i++) {
+    node.children[i].value.sortOrder = i;
+    sortTree(node.children[i])
+  }
+
 }
 
 function displayTree(node) {
