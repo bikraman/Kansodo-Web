@@ -1,5 +1,4 @@
-"use strict";
-
+"use strict"
 
 
 window.onload = function () {
@@ -443,10 +442,45 @@ function createListItem(task) {
 
         if (event.clientX > box.x && event.clientX < box.x + box.width && event.clientY > box.y && event.clientY < box.y + box.height) {
           console.log("near")
-          if (event.clientY > box.y + (box.height/2))
-            item.after(event.target)
-          else if (event.clientY < box.y + (box.height/2))
-            item.before(event.target)
+
+          new Promise((resolve, reject) => {
+
+            tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+
+            tasksObjectStore.get(task.id).onsuccess = (event) => {
+              resolve(event.target.result);
+            }
+          }).then((value) => {
+
+            return new Promise((resolve, reject) => {
+              tasksObjectStore.get(item.parentElement.id).onsuccess = (event) => {
+                resolve({ currentElement: value, targetElement: event.target.result});
+              }
+            })
+          }).then((value) => {
+
+            console.log(value.targetElement)
+            console.log(value.currentElement)
+
+            if(value.targetElement === undefined)
+              value.currentElement.parentId = null;
+            else 
+              value.currentElement.parentId = value.targetElement.parentId;
+
+            return new Promise((resolve, reject) => {
+              tasksObjectStore.put(value.currentElement).onsuccess = (event) => {
+                resolve(true)
+              }
+            })
+          }).then((value) => {
+              
+            if (event.clientY > box.y + (box.height/2)) {
+              item.after(event.target)
+            }
+            else if (event.clientY < box.y + (box.height/2)) {
+              item.before(event.target)
+            }
+          })
         }
     }
 
