@@ -425,12 +425,12 @@ function createListItem(task) {
 
         if (event.clientX > box.x && event.clientX < box.x + box.width && event.clientY > box.y && event.clientY < box.y + box.height) {
           console.log("near")
-          item.after(event.target)
+          if (event.clientY > box.y + (box.height/2))
+            item.after(event.target)
+          else if (event.clientY < box.y + (box.height/2))
+            item.before(event.target)
         }
-
-
     }
-
 
     listItem.style.display = "flex"
   })
