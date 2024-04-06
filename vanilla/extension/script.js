@@ -4,6 +4,7 @@
 
 window.onload = function () {
     console.log("loaded");
+
 }
 
 let db;
@@ -395,13 +396,6 @@ function createListItem(task) {
   listItem.addEventListener("mousedown", event => {
     console.log("mousedown")
     longPress = true;
-    setTimeout(() => {
-      if (longPress) {
-        console.log("long pressed")
-        listItem.style.visibility = "none"
-
-      }
-    }, 1000)
   });
 
   let style = null;
@@ -418,8 +412,26 @@ function createListItem(task) {
 
   })
 
+
   listItem.addEventListener("dragend", event => {
-    console.log("drag end")
+    console.log(event)
+
+    const allItems = document.getElementsByClassName("list-item")
+
+    const currentBox = event.target.getBoundingClientRect()
+
+    for (let item of allItems) {
+        const box = item.getBoundingClientRect()
+
+        if (event.clientX > box.x && event.clientX < box.x + box.width && event.clientY > box.y && event.clientY < box.y + box.height) {
+          console.log("near")
+          item.after(event.target)
+        }
+
+
+    }
+
+
     listItem.style.display = "flex"
   })
 
