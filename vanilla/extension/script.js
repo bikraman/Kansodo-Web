@@ -26,11 +26,11 @@ class TaskNode {
 
 class ItemClass {
 
-  constructor(id, parentId, data) {
+  constructor(id, parentId, data, sortOrder) {
     this.id = id;
     this.parentId = parentId;
     this.data = data;
-    this.sortOrder = 0;
+    this.sortOrder = sortOrder;
     this.isCompleted = false;
     this.isExpanded = true;
     this.dateAdded = new Date();
@@ -46,7 +46,7 @@ class ItemClass {
 // tasks.push(new ItemClass(5, 1, "Implement user authentication system"));
 // tasks.push(new ItemClass(6, 1, "Design user interface for the dashboard"));
 
-const root = new TaskNode(new ItemClass(20, null, "Write something"))
+const root = new TaskNode(new ItemClass(1, null, "Write something"))
 
 
 request.onsuccess = (event) => {
@@ -109,8 +109,9 @@ function sortTree(node) {
   if(node.children.length === 0)
     return;
 
+  node.children.sort((a, b) => { a.value.sortOrder - b.value.sortOrder} )
+
   for(let i = 0; i < node.children.length; i++) {
-    node.children[i].value.sortOrder = i;
     sortTree(node.children[i])
   }
 
@@ -221,19 +222,41 @@ function generateUUID() {
 
 addButton.addEventListener("click", (event) => {
 
+    if(listElement.children.length === 1) {
 
-    const task = new ItemClass(generateUUID(), null, taskInput.value);
+      tasksObjectStore = db
+      .transaction("tasks", "readwrite")
+      .objectStore("tasks");
 
-    tasksObjectStore = db
-    .transaction("tasks", "readwrite")
-    .objectStore("tasks");
+      const task = new ItemClass(generateUUID(), null, taskInput.value, 0);
 
-    tasksObjectStore.add(task)
+      tasksObjectStore.add(task)
+  
+      tasksObjectStore.transaction.oncomplete = () => {
+        createListItemAndAdd(task);
+      }
+    } else {
 
-    tasksObjectStore.transaction.oncomplete = () => {
-      createListItemAndAdd(task);
+      const lastTaskId = listElement.children[listElement.children.length - 1].id
+
+      tasksObjectStore = db
+      .transaction("tasks", "readwrite")
+      .objectStore("tasks");
+
+      tasksObjectStore.get(lastTaskId).onsuccess = (event) => {
+
+        console.log(event.target.result)
+        const sortOrder = event.target.result.sortOrder + 1
+        const task = new ItemClass(generateUUID(), null, taskInput.value, sortOrder);
+
+        tasksObjectStore.add(task)
+  
+        tasksObjectStore.transaction.oncomplete = () => {
+          createListItemAndAdd(task);
+        }
+
+      }
     }
-
 })
 
 function createListItemAndAdd(task) {
