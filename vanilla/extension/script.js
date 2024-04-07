@@ -1,9 +1,9 @@
-"use strict";
-
+"use strict"
 
 
 window.onload = function () {
     console.log("loaded");
+
 }
 
 let db;
@@ -26,10 +26,11 @@ class TaskNode {
 
 class ItemClass {
 
-  constructor(id, parentId, data) {
+  constructor(id, parentId, data, sortOrder) {
     this.id = id;
     this.parentId = parentId;
     this.data = data;
+    this.sortOrder = sortOrder;
     this.isCompleted = false;
     this.isExpanded = true;
     this.dateAdded = new Date();
@@ -45,7 +46,7 @@ class ItemClass {
 // tasks.push(new ItemClass(5, 1, "Implement user authentication system"));
 // tasks.push(new ItemClass(6, 1, "Design user interface for the dashboard"));
 
-const root = new TaskNode(new ItemClass(20, null, "Write something"))
+const root = new TaskNode(new ItemClass(1, null, "Write something"))
 
 
 request.onsuccess = (event) => {
@@ -68,6 +69,8 @@ request.onsuccess = (event) => {
     else {
       console.log("No more entries!");
       console.log(root)
+
+      sortTree(root)
       displayTree(root)
     }
 
@@ -96,6 +99,22 @@ request.onsuccess = (event) => {
   tasksObjectStore.transaction.onerror = (event) => {
     console.log(event.target.error.message);
   }
+}
+
+function sortTree(node) {
+
+  if (node.value === undefined)
+    return;
+
+  if(node.children.length === 0)
+    return;
+
+  node.children.sort((a, b) => { a.value.sortOrder - b.value.sortOrder} )
+
+  for(let i = 0; i < node.children.length; i++) {
+    sortTree(node.children[i])
+  }
+
 }
 
 function displayTree(node) {
@@ -203,19 +222,41 @@ function generateUUID() {
 
 addButton.addEventListener("click", (event) => {
 
+    if(listElement.children.length === 1) {
 
-    const task = new ItemClass(generateUUID(), null, taskInput.value);
+      tasksObjectStore = db
+      .transaction("tasks", "readwrite")
+      .objectStore("tasks");
 
-    tasksObjectStore = db
-    .transaction("tasks", "readwrite")
-    .objectStore("tasks");
+      const task = new ItemClass(generateUUID(), null, taskInput.value, 0);
 
-    tasksObjectStore.add(task)
+      tasksObjectStore.add(task)
+  
+      tasksObjectStore.transaction.oncomplete = () => {
+        createListItemAndAdd(task);
+      }
+    } else {
 
-    tasksObjectStore.transaction.oncomplete = () => {
-      createListItemAndAdd(task);
+      const lastTaskId = listElement.children[listElement.children.length - 1].id
+
+      tasksObjectStore = db
+      .transaction("tasks", "readwrite")
+      .objectStore("tasks");
+
+      tasksObjectStore.get(lastTaskId).onsuccess = (event) => {
+
+        console.log(event.target.result)
+        const sortOrder = event.target.result.sortOrder + 1
+        const task = new ItemClass(generateUUID(), null, taskInput.value, sortOrder);
+
+        tasksObjectStore.add(task)
+  
+        tasksObjectStore.transaction.oncomplete = () => {
+          createListItemAndAdd(task);
+        }
+
+      }
     }
-
 })
 
 function createListItemAndAdd(task) {
@@ -388,13 +429,94 @@ function createListItem(task) {
         }
       }
     }
-
-    
   });
+
+  let longPress = false
+
+  listItem.addEventListener("mousedown", event => {
+    console.log("mousedown")
+    longPress = true;
+  });
+
+  let style = null;
+
+  listItem.addEventListener("dragstart", event => {
+    setTimeout(() => {
+      listItem.style.display = "none"
+    }, 0)
+  })
+
+  listItem.addEventListener("drag", event => {
+    console.log("dragging")
+    // listItem.style.display = "none"
+
+  })
+
+
+  listItem.addEventListener("dragend", event => {
+    console.log(event)
+
+    const allItems = document.getElementsByClassName("list-item")
+
+    const currentBox = event.target.getBoundingClientRect()
+
+    for (let item of allItems) {
+        const box = item.getBoundingClientRect()
+
+        if (event.clientX > box.x && event.clientX < box.x + box.width && event.clientY > box.y && event.clientY < box.y + box.height) {
+          console.log("near")
+
+          new Promise((resolve, reject) => {
+
+            tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+
+            tasksObjectStore.get(task.id).onsuccess = (event) => {
+              resolve(event.target.result);
+            }
+          }).then((value) => {
+
+            return new Promise((resolve, reject) => {
+              tasksObjectStore.get(item.parentElement.id).onsuccess = (event) => {
+                resolve({ currentElement: value, targetElement: event.target.result});
+              }
+            })
+          }).then((value) => {
+
+            console.log(value.targetElement)
+            console.log(value.currentElement)
+
+            if(value.targetElement === undefined)
+              value.currentElement.parentId = null;
+            else 
+              value.currentElement.parentId = value.targetElement.parentId;
+
+            return new Promise((resolve, reject) => {
+              tasksObjectStore.put(value.currentElement).onsuccess = (event) => {
+                resolve(true)
+              }
+            })
+          }).then((value) => {
+              
+            if (event.clientY > box.y + (box.height/2)) {
+              item.after(event.target)
+            }
+            else if (event.clientY < box.y + (box.height/2)) {
+              item.before(event.target)
+            }
+          })
+        }
+    }
+
+    listItem.style.display = "flex"
+  })
 
   listItem.addEventListener("mousemove", (event) => {
     // console.log(event.x);
     // text.style.paddingLeft = `${event.x}px`;
+  });
+
+  listItem.addEventListener("mouseup", event => {
+    longPress = false;
   });
 
   listItem.addEventListener("mouseout", (event) => {
