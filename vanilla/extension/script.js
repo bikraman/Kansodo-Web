@@ -72,6 +72,8 @@ request.onsuccess = (event) => {
 
       sortTree(root)
       displayTree(root)
+
+      listElement.children[0].style.display = "none";
     }
 
 
