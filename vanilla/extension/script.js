@@ -1,10 +1,14 @@
-"use strict"
+// "use strict"
 
+
+import  getRandomNumber from './library/test.js'
 
 window.onload = function () {
     console.log("loaded");
 
 }
+
+console.log(getRandomNumber());
 
 let db;
 let tasksObjectStore;
