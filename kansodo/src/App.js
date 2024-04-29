@@ -25,58 +25,89 @@ function Top() {
 
 function List() {
 
+  const [dbInstance, setDbInstance] = useState(null);
+  const [tasksObjectStore, setTasksObjectStore] = useState(null);
+
   useEffect(() => {
-    let db;
-    let tasksObjectStore;
 
     const root = new TaskNode(new ItemClass(1, null, "Write something"));
 
-    const request = window.indexedDB.open("list-db", 3);
+    const request = window.indexedDB.open("list-db", 1);
 
-    function sortTree(node) {
-
-      if (node.value === undefined)
-        return;
+    request.onupgradeneeded = (event) => {
+      console.log("onupgradeneeded");
     
-      if(node.children.length === 0)
-        return;
+      const db = event.target.result;
+      setDbInstance(db);
     
-      node.children.sort((a, b) => { a.value.sortOrder - b.value.sortOrder} )
+      const objectStore = db.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
+      objectStore.createIndex("id", "id", { unique: true });
+      objectStore.createIndex("parentId", "parentId", { unique: false })
     
-      for(let i = 0; i < node.children.length; i++) {
-        sortTree(node.children[i])
+      // Create an index to search customers by email. We want to ensure that
+      // no two customers have the same email, so use a unique index.
+      objectStore.createIndex("data", "data", { unique: false });
+      objectStore.createIndex("dateAdded", "dateAdded", { unique: true });
+    
+      objectStore.transaction.oncomplete = (event) => {
+        console.log("object store created");
       }
     
+      objectStore.onerror = (event) => {
+        console.log("object store creation failed");
+      }
     }
     
-    function displayTree(node) {
-    
-      if (node === null) 
-        return;
-    
-      createListItemAndAdd(node.value)
-    
-      for (let child of node.children) {
-          displayTree(child);
-      }
+    request.onerror = (event) => {
+      console.log("onerror");
     }
-    function addToTree(task) {
 
-      if (task.parentId === null) {
-        root.addChild(new TaskNode(task))
-      }
-      else {
-        searchInTree(root, task)
-      }
+    // function sortTree(node) {
+
+    //   if (node.value === undefined)
+    //     return;
     
-    }
+    //   if(node.children.length === 0)
+    //     return;
+    
+    //   node.children.sort((a, b) => { a.value.sortOrder - b.value.sortOrder} )
+    
+    //   for(let i = 0; i < node.children.length; i++) {
+    //     sortTree(node.children[i])
+    //   }
+    
+    // }
+    
+    // function displayTree(node) {
+    
+    //   if (node === null) 
+    //     return;
+    
+    //   createListItemAndAdd(node.value)
+    
+    //   for (let child of node.children) {
+    //       displayTree(child);
+    //   }
+    // }
+    // function addToTree(task) {
+
+    //   if (task.parentId === null) {
+    //     root.addChild(new TaskNode(task))
+    //   }
+    //   else {
+    //     searchInTree(root, task)
+    //   }
+    
+    // }
     
 
     request.onsuccess = (event) => {
       console.log("onsuccess");
-      db = event.target.result;
 
-      tasksObjectStore = db
+      const db = event.target.result;
+      setDbInstance(db);
+
+      const tasksObjectStore = dbInstance
           .transaction("tasks", "readonly")
           .objectStore("tasks");
 
@@ -86,17 +117,19 @@ function List() {
         if (cursor) {
           const task = cursor.value;
 
-          addToTree(task);
+          // addToTree(task);
+
+          <ListItem task={task}/>
           cursor.continue();
         }
         else {
           console.log("No more entries!");
           console.log(root)
 
-          sortTree(root)
-          displayTree(root)
+          // sortTree(root)
+          // displayTree(root)
 
-          listElement.children[0].style.display = "none";
+          // listElement.children[0].style.display = "none";
         }
 
 
@@ -128,11 +161,12 @@ function List() {
   }, [])
 
   return <div id="list" class="list-container">
+
   </div>
 }
 
 
-const ListItem = ({ task, db }) => {
+const ListItem = ({ task }) => {
   const [isExpanded, setIsExpanded] = useState(task.isExpanded || false);
 
   const handleCheckboxChange = (event) => {
