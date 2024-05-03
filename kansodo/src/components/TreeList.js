@@ -40,6 +40,8 @@ const ListItem = ({ task }) => {
 
     const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
+        console.log(event.target.checked)
+        setIsCompleted(event.target.checked)
     };
 
     const handleTextChange = (event) => {
@@ -66,10 +68,12 @@ const ListItem = ({ task }) => {
         // Logic to handle add subtask click
     };
 
+    const [isCompleted, setIsCompleted] = useState(task.isCompleted)
+
     return (
         <div className="list-item-container" id={task.id}>
         <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <input type="checkbox" className="list-item-checkbox" checked={task.isCompleted} onChange={handleCheckboxChange} />
+            <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
             <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{task.data}</span>
             <span className="list-item-add-subtask" onClick={handleAddSubTaskClick}><img src={plus} alt="Add Subtask" /></span>
             <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete" /></span>
