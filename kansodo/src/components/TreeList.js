@@ -19,7 +19,7 @@ export default function TreeList({data}) {
     const items = []
     getStuff(data, items)
 
-    return (<>{items}</>);
+    return (<div className='list-container'>{items}</div>);
 }
 
 function getStuff(node, final) {
@@ -34,8 +34,7 @@ function getStuff(node, final) {
     }
 }
 
-  
-  
+
 const ListItem = ({ task }) => {
     const [isExpanded, setIsExpanded] = useState(task.isExpanded ?? false);
 

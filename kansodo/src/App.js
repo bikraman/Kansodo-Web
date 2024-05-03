@@ -23,11 +23,11 @@ function App() {
 
   return (
     // <ListItem/>
-    <>
+    <div className='hello'>
         <h1 id="my">Kansodo</h1>
         <Top/>
         <TreeList data = {root}/>
-    </>
+    </div>
   );
 }
 
