@@ -8,16 +8,8 @@ import plus from './plus-solid.svg'
 
 export default function TreeList({data}) {
 
-    // const [data, setData] = useState(null);
 
-    useEffect(() => {
-
-    });
-
-    console.log(data)
-
-    const items = []
-    getStuff(data, items)
+    const items = data.children.map ((element) => <ListItem task={element}/>)
 
     return (<div className='list-container'>{items}</div>);
 }
@@ -36,7 +28,9 @@ function getStuff(node, final) {
 
 
 const ListItem = ({ task }) => {
-    const [isExpanded, setIsExpanded] = useState(task.isExpanded ?? false);
+
+    const value = task.value
+    const [isExpanded, setIsExpanded] = useState(value.isExpanded ?? false);
 
     const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
@@ -68,18 +62,21 @@ const ListItem = ({ task }) => {
         // Logic to handle add subtask click
     };
 
-    const [isCompleted, setIsCompleted] = useState(task.isCompleted)
+    const [isCompleted, setIsCompleted] = useState(value.isCompleted)
+
+    const items = task.children.map ((element) => <ListItem task={element}/>)
 
     return (
-        <div className="list-item-container" id={task.id}>
+        <div className="list-item-container" id={value.id}>
         <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
-            <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{task.data}</span>
+            <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{value.data}</span>
             <span className="list-item-add-subtask" onClick={handleAddSubTaskClick}><img src={plus} alt="Add Subtask" /></span>
             <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete" /></span>
         </div>
-        <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' }}>
+        <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
             {/* Subtask components can be rendered here */}
+            {items}
         </div>
         </div>
     );
