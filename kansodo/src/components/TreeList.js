@@ -8,33 +8,19 @@ import plus from './plus-solid.svg'
 
 export default function TreeList({data}) {
 
+    const [taskTreeRoot, setTaskTreeRoot] = useState(data)
 
-    const items = data.children.map ((element) => <ListItem task={element}/>)
-
+    const items = taskTreeRoot.children.map ((element) => <ListItem taskNode={element}/>)
     return (<div className='list-container'>{items}</div>);
 }
 
-function getStuff(node, final) {
+const ListItem = ({ taskNode }) => {
 
-    if(node === null)
-        return;
-
-    final.push(<ListItem task={node.value}/>);
-
-    for (let child of node.children) {
-        getStuff(child, final)
-    }
-}
-
-
-const ListItem = ({ task }) => {
-
-    const value = task.value
-    const [isExpanded, setIsExpanded] = useState(value.isExpanded ?? false);
+    const [task, setTask] = useState(taskNode.value)
+    const [isExpanded, setIsExpanded] = useState(task.isExpanded ?? false);
 
     const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
-        console.log(event.target.checked)
         setIsCompleted(event.target.checked)
     };
 
@@ -62,20 +48,19 @@ const ListItem = ({ task }) => {
         // Logic to handle add subtask click
     };
 
-    const [isCompleted, setIsCompleted] = useState(value.isCompleted)
+    const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
-    const items = task.children.map ((element) => <ListItem task={element}/>)
+    const items = taskNode.children.map ((element) => <ListItem taskNode={element}/>)
 
     return (
-        <div className="list-item-container" id={value.id}>
+        <div className="list-item-container" id={task.id}>
         <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
-            <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{value.data}</span>
+            <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{task.data}</span>
             <span className="list-item-add-subtask" onClick={handleAddSubTaskClick}><img src={plus} alt="Add Subtask" /></span>
             <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete" /></span>
         </div>
         <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
-            {/* Subtask components can be rendered here */}
             {items}
         </div>
         </div>

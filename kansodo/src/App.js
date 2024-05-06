@@ -20,10 +20,12 @@ function App() {
   root.children[0].addChild(new TaskNode(new ItemClass(5, 1, "Implement user authentication system")));
   root.children[0].addChild(new TaskNode(new ItemClass(6, 1, "Design user interface for the dashboard")));
 
+  root.children[0].children[0].addChild(new TaskNode(new ItemClass(7, 6, "Make figma prototype")))
+
 
   return (
     // <ListItem/>
-    <div className='hello'>
+    <div className='main'>
         <h1 id="my">Kansodo</h1>
         <Top/>
         <TreeList data = {root}/>
@@ -32,8 +34,6 @@ function App() {
 }
 
 function pushToDb(task) {
-
-
 
 }
 
