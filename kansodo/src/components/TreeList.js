@@ -16,6 +16,7 @@ export default function TreeList({data}) {
 
 const ListItem = ({ taskNode }) => {
 
+    const [node, setNode] = useState(taskNode)
     const [task, setTask] = useState(taskNode.value)
     const [isExpanded, setIsExpanded] = useState(task.isExpanded ?? false);
 
@@ -28,8 +29,10 @@ const ListItem = ({ taskNode }) => {
         // Logic to handle text change
     };
 
-    const handleDoubleClick = () => {
+    const handleDoubleClick = (event) => {
         // Logic to handle double click
+        console.log(`double click at ${event.target}`)
+        setIsExpanded(!isExpanded)
     };
 
     const handleDragStart = (event) => {
@@ -44,21 +47,36 @@ const ListItem = ({ taskNode }) => {
         // Logic to handle delete click
     };
 
-    const handleAddSubTaskClick = () => {
+    const handleAddSubTaskDoubleClick = (event) => {
+        event.stopPropagation();
+    }
+
+    const handleAddSubTaskClick = (event) => {
         // Logic to handle add subtask click
+        
+        console.log("sub task click")
+
+        taskNode.addChild(new TaskNode(new ItemClass(10, task.id, "SubTask 0")))
+        console.log(taskNode)
+        setNode({
+            ...node,
+            children: taskNode.children
+        })
+
+
     };
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
-    const items = taskNode.children.map ((element) => <ListItem taskNode={element}/>)
+    const items = node.children.map ((element) => <ListItem taskNode={element}/>)
 
     return (
         <div className="list-item-container" id={task.id}>
-        <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDoubleClick={handleDoubleClick}>
             <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
             <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{task.data}</span>
-            <span className="list-item-add-subtask" onClick={handleAddSubTaskClick}><img src={plus} alt="Add Subtask" /></span>
-            <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete" /></span>
+            <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span>
+            <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span>
         </div>
         <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
             {items}

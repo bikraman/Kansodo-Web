@@ -1,7 +1,7 @@
 export default class TaskNode {
 
-    constructor(value) {
-      this.children = []
+    constructor(value, children) {
+      this.children = children ?? []
       this.value = value
     }
   

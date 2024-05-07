@@ -22,29 +22,37 @@ function App() {
 
   root.children[0].children[0].addChild(new TaskNode(new ItemClass(7, 6, "Make figma prototype")))
 
+  const [taskRoot, setTaskTreeRoot] = useState(root)
+
 
   return (
     // <ListItem/>
     <div className='main'>
         <h1 id="my">Kansodo</h1>
-        <Top/>
-        <TreeList data = {root}/>
+        <Top  onAddTask = {(task) => {
+
+          taskRoot.addChild(new TaskNode(new ItemClass(34, 1, task, taskRoot.children.length)))
+          setTaskTreeRoot(new TaskNode(taskRoot.value, taskRoot.children))
+        }}/>
+        <TreeList data = {taskRoot}/>
     </div>
   );
 }
 
-function pushToDb(task) {
+function pushToDb(task, onAddTask) {
+
+
 
 }
 
-function Top() {
+function Top({onAddTask}) {
 
   const [task, setTask] = useState("")
 
   return (
     <span>
-      <input id="task-input" type="text" value={task} onInput={(event) =>  {setTask(event.target.value)} } placeholder="Enter a new task"/>
-      <button id="add-button" onClick={(event) => console.log(event) } >Add</button>
+      <input id="task-input" type="text" value={task} onInput={(event) => { setTask(event.target.value)} } placeholder="Enter a new task"/>
+      <button id="add-button" onClick={(event) => onAddTask(task) } >Add</button>
     </span>
     );
 }
