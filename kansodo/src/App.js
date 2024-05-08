@@ -7,6 +7,8 @@ import TreeList from './components/TreeList';
 import TaskNode from './models/TaskNode'
 import ItemClass from './models/ItemClass';
 
+import generateUUID from './util/UUIDUtils';
+
 function App() {
 
   const root = new TaskNode(new ItemClass(420, null, "Write something"));
@@ -31,7 +33,8 @@ function App() {
         <h1 id="my">Kansodo</h1>
         <Top  onAddTask = {(task) => {
 
-          taskRoot.addChild(new TaskNode(new ItemClass(34, 1, task, taskRoot.children.length)))
+          taskRoot.addChild(new TaskNode(new ItemClass(generateUUID(), 1, task, taskRoot.children.length)))
+          console.log(taskRoot)
           setTaskTreeRoot(new TaskNode(taskRoot.value, taskRoot.children))
         }}/>
         <TreeList data = {taskRoot}/>
@@ -52,7 +55,7 @@ function Top({onAddTask}) {
   return (
     <span>
       <input id="task-input" type="text" value={task} onInput={(event) => { setTask(event.target.value)} } placeholder="Enter a new task"/>
-      <button id="add-button" onClick={(event) => onAddTask(task) } >Add</button>
+      <button id="add-button" onClick={() => onAddTask(task) }>Add</button>
     </span>
     );
 }
