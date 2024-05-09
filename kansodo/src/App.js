@@ -39,20 +39,11 @@ function App() {
           setTaskTreeRoot(newTaskRoot)
         }}/>
         <TreeList data = {taskRoot} onDelete={(taskId) => {
-
-
-
           const updatedChildren = taskRoot.children.filter((value) => value.value.id !== taskId )
           setTaskTreeRoot(new TaskNode(taskRoot.value, updatedChildren))
         }}/>
     </div>
   );
-}
-
-function pushToDb(task, onAddTask) {
-
-
-
 }
 
 function Top({onAddTask}) {

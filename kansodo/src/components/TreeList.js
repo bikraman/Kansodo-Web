@@ -71,10 +71,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
-    const items = node.children.map ((element) => <ListItem taskNode={element} deleteTask={(taskId) => {
-        console.log(node.value.id)
-        console.log(taskId)
-        console.log(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
+    const items = node.children.map ((element) => <ListItem key = {element.value.id }taskNode={element} deleteTask={(taskId) => {
         setNode(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
     }}/>)
 
