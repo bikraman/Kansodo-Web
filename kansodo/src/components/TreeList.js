@@ -9,15 +9,20 @@ import plus from './plus-solid.svg'
 import generateUUID from '../util/UUIDUtils.js';
 
 
-export default function TreeList({data}) {
+export default function TreeList({data, onDelete}) {
 
-    const [taskTreeRoot, setTaskTreeRoot] = useState(data)
+    // const [taskTreeRoot, setTaskTreeRoot] = useState(data)
 
-    const items = taskTreeRoot.children.map ((element) => <ListItem key = {element.value.id} taskNode={element}/>)
+    console.log(data)
+
+    const items = data.children.map ((element) => <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
+        // setTaskTreeRoot(new TaskNode(taskTreeRoot.value, taskTreeRoot.children.filter((value) => value.value.id !== taskId )))
+        onDelete(taskId)
+    }}/>)
     return (<div className='list-container'>{items}</div>);
 }
 
-const ListItem = ({ taskNode }) => {
+const ListItem = ({ taskNode, deleteTask }) => {
 
     const [node, setNode] = useState(taskNode)
     const [task, setTask] = useState(taskNode.value)
@@ -47,8 +52,10 @@ const ListItem = ({ taskNode }) => {
         console.log(event)
     };
 
-    const handleDeleteClick = () => {
+    const handleDeleteClick = (event) => {
         // Logic to handle delete click
+        console.log(`delete ${task.id}`);
+        deleteTask(task.id)
     };
 
     const handleAddSubTaskDoubleClick = (event) => {
@@ -64,7 +71,12 @@ const ListItem = ({ taskNode }) => {
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
-    const items = node.children.map ((element) => <ListItem taskNode={element}/>)
+    const items = node.children.map ((element) => <ListItem taskNode={element} deleteTask={(taskId) => {
+        console.log(node.value.id)
+        console.log(taskId)
+        console.log(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
+        setNode(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
+    }}/>)
 
     return (
         <div className="list-item-container" id={task.id}>

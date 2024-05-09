@@ -22,22 +22,29 @@ function App() {
   root.children[0].addChild(new TaskNode(new ItemClass(5, 1, "Implement user authentication system")));
   root.children[0].addChild(new TaskNode(new ItemClass(6, 1, "Design user interface for the dashboard")));
 
-  root.children[0].children[0].addChild(new TaskNode(new ItemClass(7, 6, "Make figma prototype")))
+  root.children[0].children[1].addChild(new TaskNode(new ItemClass(7, 6, "Make figma prototype")))
 
   const [taskRoot, setTaskTreeRoot] = useState(root)
 
 
   return (
-    // <ListItem/>
     <div className='main'>
         <h1 id="my">Kansodo</h1>
         <Top  onAddTask = {(task) => {
 
-          taskRoot.addChild(new TaskNode(new ItemClass(generateUUID(), 1, task, taskRoot.children.length)))
-          console.log(taskRoot)
-          setTaskTreeRoot(new TaskNode(taskRoot.value, taskRoot.children))
+          const newTaskRoot = new TaskNode(taskRoot.value, taskRoot.children)
+
+          newTaskRoot.addChild(new TaskNode(new ItemClass(generateUUID(), 420, task, newTaskRoot.children.length)))
+          console.log(newTaskRoot)
+          setTaskTreeRoot(newTaskRoot)
         }}/>
-        <TreeList data = {taskRoot}/>
+        <TreeList data = {taskRoot} onDelete={(taskId) => {
+
+
+
+          const updatedChildren = taskRoot.children.filter((value) => value.value.id !== taskId )
+          setTaskTreeRoot(new TaskNode(taskRoot.value, updatedChildren))
+        }}/>
     </div>
   );
 }
