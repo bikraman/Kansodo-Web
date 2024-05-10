@@ -11,14 +11,10 @@ import generateUUID from '../util/UUIDUtils.js';
 
 export default function TreeList({data, onDelete}) {
 
-    // const [taskTreeRoot, setTaskTreeRoot] = useState(data)
-
-    console.log(data)
-
     const items = data.children.map ((element) => <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
-        // setTaskTreeRoot(new TaskNode(taskTreeRoot.value, taskTreeRoot.children.filter((value) => value.value.id !== taskId )))
         onDelete(taskId)
     }}/>)
+    
     return (<div className='list-container'>{items}</div>);
 }
 
@@ -45,11 +41,16 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     const handleDragStart = (event) => {
         // Logic to handle drag start
+        console.log(event);
     };
+
+    const handleDrag = (event) => {
+        console.log(event);
+    }
 
     const handleDragEnd = (event) => {
         // Logic to handle drag end
-        console.log(event)
+        console.log(event);
     };
 
     const handleDeleteClick = (event) => {
@@ -77,7 +78,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     return (
         <div className="list-item-container" id={task.id}>
-        <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDoubleClick={handleDoubleClick}>
+        <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
             <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
             <span className='list-item-text-area'>
                 <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{task.data}</span>
