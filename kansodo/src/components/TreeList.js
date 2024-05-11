@@ -11,7 +11,7 @@ import generateUUID from '../util/UUIDUtils.js';
 
 export default function TreeList({data, onDelete}) {
 
-    const items = data.children.map ((element) => <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
+    const items = data.children.filter((element) => element.value.isVisible).map ((element) => <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
         onDelete(taskId)
     }}/>)
     

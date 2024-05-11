@@ -8,6 +8,7 @@ export default class ItemClass {
       this.isCompleted = false;
       this.isExpanded = true;
       this.dateAdded = new Date();
+      this.isVisible = true;
     }
   }
   
