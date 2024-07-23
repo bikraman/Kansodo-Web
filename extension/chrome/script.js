@@ -1,16 +1,9 @@
 "use strict"
 
-
 window.onload = function () {
     console.log("loaded");
 
 }
-
-
-let db;
-let tasksObjectStore;
-
-const request = window.indexedDB.open("list-db", 3);
 
 class TaskNode {
 
@@ -49,6 +42,11 @@ class ItemClass {
 
 const root = new TaskNode(new ItemClass(1, null, "Write something"))
 
+
+let db;
+let tasksObjectStore;
+
+const request = window.indexedDB.open("list-db", 3);
 
 request.onsuccess = (event) => {
   console.log("onsuccess");
