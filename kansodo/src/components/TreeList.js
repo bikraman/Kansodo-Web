@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import TaskNode from '../models/TaskNode.js'
 import ItemClass from '../models/ItemClass.js';
@@ -8,17 +8,26 @@ import plus from './plus-solid.svg'
 
 import generateUUID from '../util/UUIDUtils.js';
 
+import { DbContext } from '../App.js';
+
 
 export default function TreeList({data, onDelete}) {
 
-    const items = data.children.filter((element) => element.value.isVisible).map ((element) => <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
-        onDelete(taskId)
-    }}/>)
+    const items = data.children
+                .filter((element) => element.value.isVisible)
+                .map ((element) => 
+                        <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
+                                onDelete(taskId)
+                            }
+                        }/>
+                    )
     
     return (<div className='list-container'>{items}</div>);
 }
 
 const ListItem = ({ taskNode, deleteTask }) => {
+
+    const db = useContext(DbContext);
 
     const [node, setNode] = useState(taskNode)
     const [task, setTask] = useState(taskNode.value)

@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext, createContext } from 'react';
 
 import TreeList from './components/TreeList';
 
@@ -9,10 +9,14 @@ import ItemClass from './models/ItemClass';
 
 import generateUUID from './util/UUIDUtils';
 
+export const DbContext = createContext()
+
 function App() {
 
   const root = new TaskNode(new ItemClass(420, null, "Write something"));
   const [taskRoot, setTaskTreeRoot] = useState(root)
+  // const [store, setStore] = useState(null)
+  let dbGlobal = null
 
 
   useEffect(() => {
@@ -25,46 +29,49 @@ function App() {
     request.onsuccess = (event) => {
       console.log("onsuccess");
       db = event.target.result;
+
+      dbGlobal = db
     
       tasksObjectStore = db
           .transaction("tasks", "readonly")
           .objectStore("tasks");
+
     
-      // tasksObjectStore.index("dateAdded").openCursor().onsuccess = (event) => {
+      tasksObjectStore.index("dateAdded").openCursor().onsuccess = (event) => {
     
-      //   const cursor = event.target.result;
-      //   if (cursor) {
-      //     const task = cursor.value;
+        const cursor = event.target.result;
+        if (cursor) {
+          const task = cursor.value;
     
-      //     addToTree(task);
-      //     cursor.continue();
-      //   }
-      //   else {
-      //     console.log("No more entries!");
-      //     console.log(root)
+          addToTree(task);
+          cursor.continue();
+        }
+        else {
+          console.log("No more entries!");
+          console.log(root)
     
-      //     sortTree(root)
-      //     displayTree(root)
+          sortTree(root)
+          displayTree(root)
     
-      //     listElement.children[0].style.display = "none";
-      //   }
+          listElement.children[0].style.display = "none";
+        }
     
     
-      //   // if (tasks.length === 0) {
+        // if (tasks.length === 0) {
     
-      //   //   const emptyTask = new ItemClass(1, null, "Write your first task");
+        //   const emptyTask = new ItemClass(1, null, "Write your first task");
     
-      //   //   const newTasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+        //   const newTasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
     
-      //   //   newTasksObjectStore.add(emptyTask)
+        //   newTasksObjectStore.add(emptyTask)
     
-      //   //   newTasksObjectStore.transaction.onsuccess = () => {
-      //   //     tasks.push(emptyTask)
+        //   newTasksObjectStore.transaction.onsuccess = () => {
+        //     tasks.push(emptyTask)
     
-      //   //     createListItemAndAdd(emptyTask);
-      //   //   }
-      //   // }
-      // }
+        //     createListItemAndAdd(emptyTask);
+        //   }
+        // }
+      }
     
     
       tasksObjectStore.transaction.oncomplete = (event) => {
@@ -76,10 +83,22 @@ function App() {
       }
     }
 
+    function addToTree(task) {
+
+      if (task.parentId === null) {
+        root.addChild(new TaskNode(task))
+      }
+      else {
+        searchInTree(root, task)
+      }
+    
+    }
+
     request.onupgradeneeded = (event) => {
       console.log("onupgradeneeded");
     
       db = event.target.result;
+      dbGlobal = db
     
       const objectStore = db.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
       objectStore.createIndex("id", "id", { unique: true });
@@ -108,18 +127,33 @@ function App() {
   return (
     <div className='main'>
         <h1 id="my">Kansodo</h1>
-        <Top  onAddTask = {(task) => {
 
-          const newTaskRoot = new TaskNode(taskRoot.value, taskRoot.children)
+        <DbContext.Provider value={dbGlobal}>
+          <Top  onAddTask = {(taskText) => {
 
-          newTaskRoot.addChild(new TaskNode(new ItemClass(generateUUID(), 420, task, newTaskRoot.children.length)))
-          console.log(newTaskRoot)
-          setTaskTreeRoot(newTaskRoot)
-        }}/>
-        <TreeList data = {taskRoot} onDelete={(taskId) => {
-          const updatedChildren = taskRoot.children.filter((value) => value.value.id !== taskId )
-          setTaskTreeRoot(new TaskNode(taskRoot.value, updatedChildren))
-        }}/>
+            const task = new ItemClass(generateUUID(), null, taskText, 0);
+
+            const store = dbGlobal.transaction("tasks", "readwrite").objectStore("tasks");
+
+            store.add(task)
+
+            store.transaction.oncomplete = () => {
+              
+              const newTaskRoot = new TaskNode(taskRoot.value, taskRoot.children)
+
+              newTaskRoot.addChild(new TaskNode(task))
+              console.log(newTaskRoot)
+              setTaskTreeRoot(newTaskRoot)
+            }
+            
+          }}/>
+          <TreeList data = {taskRoot} onDelete={(taskId) => {
+            const updatedChildren = taskRoot.children.filter((value) => value.value.id !== taskId )
+            setTaskTreeRoot(new TaskNode(taskRoot.value, updatedChildren))
+          }}/>
+
+        </DbContext.Provider>
+
     </div>
   );
 }
@@ -133,9 +167,8 @@ function Top({onAddTask}) {
       <input id="task-input" type="text" value={task} onInput={(event) => { setTask(event.target.value)} } placeholder="Enter a new task"/>
       <button id="add-button" onClick={() => onAddTask(task) }>Add</button>
     </span>
-    );
+  );
 }
-
 
 
 export default App;
