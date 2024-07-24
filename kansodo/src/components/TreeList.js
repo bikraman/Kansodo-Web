@@ -66,6 +66,22 @@ const ListItem = ({ taskNode, deleteTask }) => {
         // Logic to handle delete click
         console.log(`delete ${task.id}`);
         deleteTask(task.id)
+
+        const tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+        const tagIndex = tasksObjectStore.index("parentId")
+        tasksObjectStore.delete(task.id);
+        var pdestroy = tagIndex.openKeyCursor(); 
+        pdestroy.onsuccess = function(event) {
+            const cursor = event.target.result;
+            if (cursor) {
+
+                if(cursor.key === task.id) {
+                    console.log(cursor.key)
+                    tasksObjectStore.delete(cursor.primaryKey);
+                }
+                cursor.continue();
+            }
+        }
     };
 
     const handleAddSubTaskDoubleClick = (event) => {
@@ -82,7 +98,6 @@ const ListItem = ({ taskNode, deleteTask }) => {
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
     const items = node.children.map ((element) => <ListItem key = {element.value.id }taskNode={element} deleteTask={(taskId) => {
-        
         setNode(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
     }}/>)
 
