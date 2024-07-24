@@ -178,7 +178,11 @@ function App() {
       console.log("onerror");
     }
 
-  }, taskRoot)
+    return () => {
+      console.log("cleanup")
+    }
+
+  }, [])
 
   return (
     <div className='main'>
