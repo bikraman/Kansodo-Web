@@ -2,10 +2,16 @@ body {
   /* background-color: black;
   color: white; */
   font-size: 100%;
-  font-family: "Geologica", sans-serif;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  font-style: normal;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+#header {
+  width: 100%;
 }
 
 #root {
@@ -57,7 +63,7 @@ input[type="checkbox"] {
 .list-item-text {
   display: inline;
   margin: 0px;
-  font-weight: 200;
+  font-weight: 400;
   padding-left: 8px;
   padding-right: 8px;
   font-size: 20px;

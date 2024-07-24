@@ -50,6 +50,8 @@ function App() {
           console.log(root)
     
           sortTree(root)
+          root.addChild(new TaskNode(new ItemClass(generateUUID(), null, "Create task", root.children.length + 1)))
+
           setTaskTreeRoot({
             ...root
           })
@@ -184,7 +186,7 @@ function App() {
 
   return (
     <div className='main'>
-        <h1 id="my">Kansodo</h1>
+        <Header/>
 
         <DbContext.Provider value = {db}>
           <Top  onAddTask = {(taskText) => {
@@ -224,10 +226,17 @@ function Top({onAddTask}) {
 
   return (
     <span>
-      <input id="task-input" type="text" value={task} onInput={(event) => { setTask(event.target.value)} } placeholder="Enter a new task"/>
-      <button id="add-button" onClick={() => onAddTask(task) }>Add</button>
+      {/* <input id="task-input" type="text" value={task} onInput={(event) => { setTask(event.target.value)} } placeholder="Enter a new task"/>
+      <button id="add-button" onClick={() => onAddTask(task) }>Add</button> */}
     </span>
   );
+}
+
+function Header() {
+
+  const [date, setDate] = useState("Kansodo")
+
+  return <h1 id='header'>{date}</h1>
 }
 
 

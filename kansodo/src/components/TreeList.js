@@ -90,9 +90,20 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     const handleAddSubTaskClick = (event) => {
         // Logic to handle add subtask click
-        taskNode.addChild(new TaskNode(new ItemClass(generateUUID(), task.id, "SubTask 0")))
+
+        const subTask = new ItemClass(generateUUID(), task.id, "SubTask 0")
+
+        taskNode.addChild(new TaskNode(subTask))
         console.log(taskNode)
         setNode(new TaskNode(taskNode.value, taskNode.children))
+
+        const store = db.transaction("tasks", "readwrite").objectStore("tasks");
+
+        store.add(subTask)
+
+        store.transaction.oncomplete = () => {
+            console.log("sub task added")
+        }
     };
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
