@@ -15,22 +15,21 @@ function App() {
 
   const root = new TaskNode(new ItemClass(420, null, "Write something"));
   const [taskRoot, setTaskTreeRoot] = useState(root)
-  // const [store, setStore] = useState(null)
-  let dbGlobal = null
+  const [db, setDb] = useState(null)
 
 
   useEffect(() => {
 
-    let db;
     let tasksObjectStore;
 
     const request = window.indexedDB.open("list-db", 1);
 
     request.onsuccess = (event) => {
       console.log("onsuccess");
-      db = event.target.result;
+      const db = event.target.result;
 
-      dbGlobal = db
+      setDb(db)
+      console.log(db)
     
       tasksObjectStore = db
           .transaction("tasks", "readonly")
@@ -154,7 +153,6 @@ function App() {
       console.log("onupgradeneeded");
     
       db = event.target.result;
-      dbGlobal = db
     
       const objectStore = db.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
       objectStore.createIndex("id", "id", { unique: true });
@@ -188,12 +186,14 @@ function App() {
     <div className='main'>
         <h1 id="my">Kansodo</h1>
 
-        <DbContext.Provider value={dbGlobal}>
+        <DbContext.Provider value = {db}>
           <Top  onAddTask = {(taskText) => {
 
             const task = new ItemClass(generateUUID(), null, taskText, 0);
+            console.log(db)
 
-            const store = dbGlobal.transaction("tasks", "readwrite").objectStore("tasks");
+
+            const store = db.transaction("tasks", "readwrite").objectStore("tasks");
 
             store.add(task)
 
