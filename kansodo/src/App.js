@@ -51,9 +51,12 @@ function App() {
           console.log(root)
     
           sortTree(root)
-          displayTree(root)
+          setTaskTreeRoot({
+            ...root
+          })
+          // displayTree(root)
     
-          listElement.children[0].style.display = "none";
+          //listElement.children[0].style.display = "none";
         }
     
     
@@ -94,6 +97,59 @@ function App() {
     
     }
 
+    function sortTree(node) {
+
+      if (node.value === undefined)
+        return;
+    
+      if(node.children.length === 0)
+        return;
+    
+      node.children.sort((a, b) => { return a.value.sortOrder - b.value.sortOrder} )
+    
+      for(let i = 0; i < node.children.length; i++) {
+        sortTree(node.children[i])
+      }
+    
+    }
+
+    // function displayTree(node) {
+
+    //   if (node === null) 
+    //     return;
+    
+    //   createListItemAndAdd(node.value)
+    
+    //   for (let child of node.children) {
+    //       displayTree(child);
+    //   }
+    // }
+
+
+    function searchInTree(node, target) {
+
+      if (node === null) {
+          return false;
+      }
+
+      if (node.value === null) {
+          return false;
+      }
+      
+      if (node.value.id === target.parentId) {
+          node.addChild(new TaskNode(target));
+          return true;
+      }
+      
+      for (let child of node.children) {
+          if (searchInTree(child, target)) {
+              return true;
+          }
+      }
+      
+      return false;
+    }
+
     request.onupgradeneeded = (event) => {
       console.log("onupgradeneeded");
     
@@ -122,7 +178,7 @@ function App() {
       console.log("onerror");
     }
 
-  })
+  }, taskRoot)
 
   return (
     <div className='main'>
