@@ -38,6 +38,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     const [node, setNode] = useState(taskNode)
     const [task, setTask] = useState(taskNode.value)
+    const [taskText, setTaskText] = useState(task.data)
     const [isExpanded, setIsExpanded] = useState(task.isExpanded ?? false);
 
     const handleCheckboxChange = (event) => {
@@ -47,12 +48,53 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     const handleTextChange = (event) => {
         // Logic to handle text change
+
+        if (event.code === "Enter") {
+
+            const tasksObjectStore = db.db.transaction("tasks", "readwrite").objectStore("tasks");
+
+            const existingTaskRequest = tasksObjectStore.get(task.id)
+            existingTaskRequest.onsuccess = (event) => {
+                const existingTask = event.target.result;
+
+                console.log(existingTask)
+
+                existingTask.data = taskText;
+
+                console.log(existingTask)
+
+                const requestUpdate = tasksObjectStore.put(existingTask);
+
+                requestUpdate.onsuccess = () => {
+                    console.log("update success")
+                }
+            }
+
+            existingTaskRequest.onerror = (event) => {
+                console.log(event)
+            }
+
+
+            event.preventDefault();
+
+        }
+        
+
     };
 
     const handleDoubleClick = (event) => {
         // Logic to handle double click
         console.log(`double click at ${event.target}`)
-        setIsExpanded(!isExpanded)
+
+        const store = db.db.transaction("tasks", "readwrite").objectStore("tasks")
+
+        task.isExpanded = !isExpanded
+
+        store.put(task).onsuccess = () => {
+            setIsExpanded(!isExpanded)
+        }
+
+
     };
 
     const handleDragStart = (event) => {
@@ -72,19 +114,20 @@ const ListItem = ({ taskNode, deleteTask }) => {
     const handleDeleteClick = (event) => {
         // Logic to handle delete click
         console.log(`delete ${task.id}`);
-        deleteTask(task.id)
 
-        const tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+        const tasksObjectStore = db.db.transaction("tasks", "readwrite").objectStore("tasks")
         const tagIndex = tasksObjectStore.index("parentId")
         tasksObjectStore.delete(task.id);
         var pdestroy = tagIndex.openKeyCursor(); 
         pdestroy.onsuccess = function(event) {
+            deleteTask(task.id)
             const cursor = event.target.result;
             if (cursor) {
 
                 if(cursor.key === task.id) {
                     console.log(cursor.key)
                     tasksObjectStore.delete(cursor.primaryKey);
+
                 }
                 cursor.continue();
             }
@@ -104,7 +147,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
         console.log(taskNode)
         setNode(new TaskNode(taskNode.value, taskNode.children))
 
-        const store = db.transaction("tasks", "readwrite").objectStore("tasks");
+        const store = db.db.transaction("tasks", "readwrite").objectStore("tasks");
 
         store.add(subTask)
 
@@ -121,17 +164,17 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     return (
         <div className="list-item-container" id={task.id}>
-        <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
-            <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
-            <span className='list-item-text-area'>
-                <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange}>{task.data}</span>
-                <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span>
-            </span>
-            <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span>
-        </div>
-        <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
-            {items}
-        </div>
+            <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
+                <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
+                <span className='list-item-text-area'>
+                    <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
+                    <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span>
+                </span>
+                <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span>
+            </div>
+            <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
+                {items}
+            </div>
         </div>
     );
 };
@@ -248,10 +291,8 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
             <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
                 <span className='list-item-text-area'>
-                    <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
-                    <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span>
+                    <span style={{opacity: 0.5}}className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
                 </span>
-                <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span>
             </div>
             <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
                 {items}
