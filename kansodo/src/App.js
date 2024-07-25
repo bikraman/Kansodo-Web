@@ -50,7 +50,7 @@ function App() {
           console.log(root)
     
           sortTree(root)
-          root.addChild(new TaskNode(new ItemClass(generateUUID(), null, "Create task", root.children.length + 1)))
+          // root.addChild(new TaskNode(new ItemClass(generateUUID(), null, "Create task", root.children.length + 1)))
 
           setTaskTreeRoot({
             ...root
@@ -184,16 +184,24 @@ function App() {
 
   }, [])
 
+  function onChange(task) {
+
+    const newTaskRoot = new TaskNode(taskRoot.value, taskRoot.children)
+
+    newTaskRoot.addChild(new TaskNode(task))
+    console.log(newTaskRoot)
+    setTaskTreeRoot(newTaskRoot)
+  }
+
   return (
     <div className='main'>
         <Header/>
 
-        <DbContext.Provider value = {db}>
+        <DbContext.Provider value = {{db: db, onChange: onChange}}>
           <Top  onAddTask = {(taskText) => {
 
             const task = new ItemClass(generateUUID(), null, taskText, 0);
             console.log(db)
-
 
             const store = db.transaction("tasks", "readwrite").objectStore("tasks");
 
