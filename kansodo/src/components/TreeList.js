@@ -6,6 +6,9 @@ import ItemClass from '../models/ItemClass.js';
 import trash from './trash-can-regular.svg'
 import plus from './plus-solid.svg'
 
+import arrowCollapsed from './arrow_collapsed.png'
+import arrowExpanded from './arrow_expanded.png'
+
 import generateUUID from '../util/UUIDUtils.js';
 
 import { DbContext } from '../App.js';
@@ -165,7 +168,8 @@ const ListItem = ({ taskNode, deleteTask }) => {
     return (
         <div className="list-item-container" id={task.id}>
             <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
-                <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
+                <Arrow doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
+                <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
                     <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span>
@@ -291,7 +295,7 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
             <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
                 <span className='list-item-text-area'>
-                    <span style={{opacity: 0.5}}className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
+                    <span style={{opacity: 0.5}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
                 </span>
             </div>
             <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
@@ -299,4 +303,13 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
             </div>
         </div>
     );
+
+};
+
+const Arrow = ({ doesHaveChildren, isExpanded}) => {
+
+    if (isExpanded)
+        return <span style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowExpanded}/></span>
+    else
+        return <span style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowCollapsed}/></span>
 };
