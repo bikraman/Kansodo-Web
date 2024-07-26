@@ -191,7 +191,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
                 <Arrow doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
-                    <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
+                    <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
                     {/* <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span> */}
                 </span>
                 {/* <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span> */}
@@ -356,7 +356,6 @@ const ContextMenu = ({ xPos, yPos, showMenu, onMenuItemClick }) => {
       >
         <li onClick={() => onMenuItemClick('delete')} style={{ padding: '8px', cursor: 'pointer' }}>Delete</li>
         <li onClick={() => onMenuItemClick('addSubTask')} style={{ padding: '8px', cursor: 'pointer' }}>Add Sub Task</li>
-        <li onClick={() => onMenuItemClick('check')} style={{ padding: '8px', cursor: 'pointer' }}>Task Id</li>
       </ul>
     );
 };
