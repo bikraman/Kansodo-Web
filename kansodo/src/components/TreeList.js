@@ -44,6 +44,9 @@ const ListItem = ({ taskNode, deleteTask }) => {
     const [taskText, setTaskText] = useState(task.data)
     const [isExpanded, setIsExpanded] = useState(task.isExpanded ?? false);
 
+    const [showMenu, setShowMenu] = useState(false)
+    const [menuPosition, setMenuPosition] = useState({ xPos: 0, yPos: 0 });
+
     const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
         setIsCompleted(event.target.checked)
@@ -76,13 +79,8 @@ const ListItem = ({ taskNode, deleteTask }) => {
             existingTaskRequest.onerror = (event) => {
                 console.log(event)
             }
-
-
             event.preventDefault();
-
         }
-        
-
     };
 
     const handleDoubleClick = (event) => {
@@ -96,9 +94,13 @@ const ListItem = ({ taskNode, deleteTask }) => {
         store.put(task).onsuccess = () => {
             setIsExpanded(!isExpanded)
         }
-
-
     };
+
+    const handleRightClick = (event) => {
+        event.preventDefault()
+        setShowMenu(true)
+        setMenuPosition({xPos: event.clientX, yPos: event.clientY})
+    }
 
     const handleDragStart = (event) => {
         // Logic to handle drag start
@@ -159,6 +161,24 @@ const ListItem = ({ taskNode, deleteTask }) => {
         }
     };
 
+    const handleMenuItemClick = (menu) => {
+
+        console.log(menu)
+
+        if (menu === 'addSubTask') {
+            handleAddSubTaskClick()
+            setShowMenu(false)
+        }
+        else if (menu === "delete") {
+            handleDeleteClick()
+            setShowMenu(false)
+        }
+        else if (menu === "check") {
+            console.log(task.id)
+            setShowMenu(false)
+        }
+    }
+
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
     const items = node.children.map ((element) => <ListItem key = {element.value.id }taskNode={element} deleteTask={(taskId) => {
@@ -166,19 +186,25 @@ const ListItem = ({ taskNode, deleteTask }) => {
     }}/>)
 
     return (
-        <div className="list-item-container" id={task.id}>
-            <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
+        <div className="list-item-container" id={task.id} >
+            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
                 <Arrow doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
-                    <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span>
+                    {/* <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span> */}
                 </span>
-                <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span>
+                {/* <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span> */}
             </div>
             <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
                 {items}
             </div>
+            <ContextMenu 
+                xPos={menuPosition.xPos}
+                yPos={menuPosition.yPos}
+                showMenu={showMenu}
+                onMenuItemClick={handleMenuItemClick}
+            />
         </div>
     );
 };
@@ -305,6 +331,34 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
         </div>
     );
 
+};
+
+const ContextMenu = ({ xPos, yPos, showMenu, onMenuItemClick }) => {
+    if (!showMenu) {
+      return null;
+    }
+  
+    return (
+      <ul
+        style={{
+          display: showMenu ? 'block' : 'none',
+          position: 'absolute',
+          top: `${yPos}px`,
+          left: `${xPos}px`,
+          backgroundColor: 'white',
+          border: '1px solid black',
+          listStyleType: 'none',
+          padding: 0,
+          margin: 0,
+          zIndex: 999,
+        //   boxShadow: '0px 0px 10px rgba(0,0,0,0.5)'
+        }}
+      >
+        <li onClick={() => onMenuItemClick('delete')} style={{ padding: '8px', cursor: 'pointer' }}>Delete</li>
+        <li onClick={() => onMenuItemClick('addSubTask')} style={{ padding: '8px', cursor: 'pointer' }}>Add Sub Task</li>
+        <li onClick={() => onMenuItemClick('check')} style={{ padding: '8px', cursor: 'pointer' }}>Task Id</li>
+      </ul>
+    );
 };
 
 const Arrow = ({ doesHaveChildren, isExpanded}) => {
