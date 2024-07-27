@@ -187,8 +187,8 @@ const ListItem = ({ taskNode, deleteTask }) => {
 
     return (
         <div className="list-item-container" id={task.id} >
-            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
-                <Arrow doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
+            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag}>
+                <Arrow onClick={handleDoubleClick} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
@@ -360,10 +360,10 @@ const ContextMenu = ({ xPos, yPos, showMenu, onMenuItemClick }) => {
     );
 };
 
-const Arrow = ({ doesHaveChildren, isExpanded}) => {
+const Arrow = ({ onClick, doesHaveChildren, isExpanded}) => {
 
     if (isExpanded)
-        return <span style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowExpanded}/></span>
+        return <span onClick={onClick} style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowExpanded}/></span>
     else
-        return <span style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowCollapsed}/></span>
+        return <span onClick={onClick} style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowCollapsed}/></span>
 };
