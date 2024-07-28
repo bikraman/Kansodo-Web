@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 
 import TaskNode from '../models/TaskNode.js'
 import ItemClass from '../models/ItemClass.js';
@@ -16,13 +16,25 @@ import { DbContext } from '../App.js';
 
 export default function TreeList({data, onDelete}) {
 
+    const mainRef = useRef(null)
+
+    const dragon = (event) => {
+        const rect = mainRef.current.getBoundingClientRect()
+        console.log(rect)
+    }
+
     const items = data.children
                 .filter((element) => element.value.isVisible)
                 .map ((element) => 
-                        <ListItem key = {element.value.id} taskNode={element} deleteTask={(taskId) => {
-                                onDelete(taskId)
+                        <ListItem 
+                            key = {element.value.id} 
+                            taskNode={element} 
+                            deleteTask={(taskId) => {
+                                    onDelete(taskId)
+                                }   
                             }
-                        }/>
+                            dragon={dragon}
+                            />
                     )
 
     items.push(
@@ -32,10 +44,10 @@ export default function TreeList({data, onDelete}) {
         }/>
     )
     
-    return (<div className='list-container'>{items}</div>);
+    return (<div ref = {mainRef} className='list-container'>{items}</div>);
 }
 
-const ListItem = ({ taskNode, deleteTask }) => {
+const ListItem = ({ taskNode, deleteTask, dragon }) => {
 
     const db = useContext(DbContext);
 
@@ -83,7 +95,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
         }
     };
 
-    const handleDoubleClick = (event) => {
+    const handleExpandCollapse = (event) => {
         // Logic to handle double click
         console.log(`double click at ${event.target}`)
 
@@ -108,12 +120,13 @@ const ListItem = ({ taskNode, deleteTask }) => {
     };
 
     const handleDrag = (event) => {
-        console.log(event);
+        // console.log(event);
     }
 
     const handleDragEnd = (event) => {
         // Logic to handle drag end
-        console.log(event);
+        console.log(event)
+        dragon()
     };
 
     const handleDeleteClick = (event) => {
@@ -188,7 +201,7 @@ const ListItem = ({ taskNode, deleteTask }) => {
     return (
         <div className="list-item-container" id={task.id} >
             <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag}>
-                <Arrow onClick={handleDoubleClick} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
+                <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
