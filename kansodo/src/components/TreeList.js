@@ -18,7 +18,7 @@ export default function TreeList({data, onDelete}) {
 
     const mainRef = useRef(null)
 
-    const dragon = (event) => {
+    const onDragFinished = (event) => {
         const rect = mainRef.current.getBoundingClientRect()
         console.log(rect)
     }
@@ -26,14 +26,9 @@ export default function TreeList({data, onDelete}) {
     const items = data.children
                 .filter((element) => element.value.isVisible)
                 .map ((element) => 
-                        <ListItem 
-                            key = {element.value.id} 
-                            taskNode={element} 
-                            deleteTask={(taskId) => {
-                                    onDelete(taskId)
-                                }   
-                            }
-                            dragon={dragon}
+                        <ListItem key = {element.value.id} taskNode={element} 
+                            deleteTask={(taskId) => { onDelete(taskId)}} 
+                            onDragFinished={onDragFinished}
                             />
                     )
 
@@ -47,7 +42,7 @@ export default function TreeList({data, onDelete}) {
     return (<div ref = {mainRef} className='list-container'>{items}</div>);
 }
 
-const ListItem = ({ taskNode, deleteTask, dragon }) => {
+const ListItem = ({ taskNode, deleteTask, onDragFinished }) => {
 
     const db = useContext(DbContext);
 
@@ -126,7 +121,7 @@ const ListItem = ({ taskNode, deleteTask, dragon }) => {
     const handleDragEnd = (event) => {
         // Logic to handle drag end
         console.log(event)
-        dragon()
+        onDragFinished()
     };
 
     const handleDeleteClick = (event) => {
@@ -194,9 +189,14 @@ const ListItem = ({ taskNode, deleteTask, dragon }) => {
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
-    const items = node.children.map ((element) => <ListItem key = {element.value.id }taskNode={element} deleteTask={(taskId) => {
-        setNode(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
-    }}/>)
+    const items = node.children.map ((element) => <ListItem 
+        key = {element.value.id } 
+        taskNode={element} 
+        deleteTask={(taskId) => {
+            setNode(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
+        }} 
+        onDragFinished={onDragFinished}
+        />)
 
     return (
         <div className="list-item-container" id={task.id} >
