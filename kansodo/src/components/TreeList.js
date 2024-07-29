@@ -16,11 +16,67 @@ import { DbContext } from '../App.js';
 
 export default function TreeList({data, onDelete}) {
 
+    const db = useContext(DbContext).db
+
     const mainRef = useRef(null)
 
-    const onDragFinished = (event) => {
+    const onDragFinished = (event, taskId) => {
         const rect = mainRef.current.getBoundingClientRect()
-        console.log(rect)
+        // console.log(rect)
+        const items = mainRef.current.getElementsByClassName("list-item")
+
+        // for (let item of items) {
+        //     console.log(item.getBoundingClientRect())
+        // }
+
+        let tasksObjectStore = null
+
+        for (let item of items) {
+            const box = item.getBoundingClientRect()
+    
+            if (event.clientX > box.x && event.clientX < box.x + box.width && event.clientY > box.y && event.clientY < box.y + box.height) {
+              console.log("near")
+    
+              new Promise((resolve, reject) => {
+    
+                tasksObjectStore = db.transaction("tasks", "readwrite").objectStore("tasks")
+    
+                tasksObjectStore.get(taskId).onsuccess = (event) => {
+                  resolve(event.target.result);
+                }
+              }).then((value) => {
+    
+                return new Promise((resolve, reject) => {
+                  tasksObjectStore.get(item.parentElement.id).onsuccess = (event) => {
+                    resolve({ currentElement: value, targetElement: event.target.result});
+                  }
+                })
+              }).then((value) => {
+    
+                console.log(value.targetElement)
+                console.log(value.currentElement)
+    
+                if(value.targetElement === undefined)
+                  value.currentElement.parentId = null;
+                else 
+                  value.currentElement.parentId = value.targetElement.parentId;
+    
+                return new Promise((resolve, reject) => {
+                  tasksObjectStore.put(value.currentElement).onsuccess = (event) => {
+                    resolve(true)
+                  }
+                })
+              }).then((value) => {
+                  
+                if (event.clientY > box.y + (box.height/2)) {
+                  item.after(event.target)
+                }
+                else if (event.clientY < box.y + (box.height/2)) {
+                  item.before(event.target)
+                }
+              })
+            }
+        }
     }
 
     const items = data.children
@@ -121,7 +177,7 @@ const ListItem = ({ taskNode, deleteTask, onDragFinished }) => {
     const handleDragEnd = (event) => {
         // Logic to handle drag end
         console.log(event)
-        onDragFinished()
+        onDragFinished(event,task.id)
     };
 
     const handleDeleteClick = (event) => {
