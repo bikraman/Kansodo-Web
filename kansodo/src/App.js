@@ -175,8 +175,6 @@ function App() {
     }
   }
 
-
-
   useEffect(() => {
     getDataFromDb()
   }, [])

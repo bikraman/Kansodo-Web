@@ -106,6 +106,11 @@ const ListItem = ({ taskNode, deleteTask, onDragFinished }) => {
 
     const db = useContext(DbContext);
 
+    useEffect(() => {
+
+        setNode(taskNode)
+    }, [taskNode])
+
     const [node, setNode] = useState(taskNode)
     const [task, setTask] = useState(taskNode.value)
     const [taskText, setTaskText] = useState(task.data)
