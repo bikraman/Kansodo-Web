@@ -14,7 +14,7 @@ import generateUUID from '../util/UUIDUtils.js';
 import { DbContext } from '../App.js';
 
 
-export default function TreeList({data, onDelete}) {
+export default function TreeList({data, onDelete, onRefresh}) {
 
     const db = useContext(DbContext).db
 
@@ -67,12 +67,16 @@ export default function TreeList({data, onDelete}) {
                   }
                 })
               }).then((value) => {
+
+                onRefresh()
                   
                 if (event.clientY > box.y + (box.height/2)) {
-                  item.after(event.target)
+                //   item.after(event.target)
+                    onRefresh()
                 }
                 else if (event.clientY < box.y + (box.height/2)) {
-                  item.before(event.target)
+                //   item.before(event.target)
+                    onRefresh()
                 }
               })
             }
@@ -260,7 +264,7 @@ const ListItem = ({ taskNode, deleteTask, onDragFinished }) => {
                 <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
-                    <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
+                    <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
                     {/* <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span> */}
                 </span>
                 {/* <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span> */}

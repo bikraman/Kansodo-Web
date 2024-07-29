@@ -17,19 +17,67 @@ function App() {
   const [taskRoot, setTaskTreeRoot] = useState(root)
   const [db, setDb] = useState(null)
 
+  function addToTree(root, task) {
 
-  useEffect(() => {
+    if (task.parentId === null) {
+      root.addChild(new TaskNode(task))
+    }
+    else {
+      searchInTree(root, task)
+    }
+  
+  }
+
+  function sortTree(node) {
+
+    if (node.value === undefined)
+      return;
+  
+    if(node.children.length === 0)
+      return;
+  
+    node.children.sort((a, b) => { return a.value.sortOrder - b.value.sortOrder} )
+  
+    for(let i = 0; i < node.children.length; i++) {
+      sortTree(node.children[i])
+    }
+  
+  }
+
+  function searchInTree(node, target) {
+
+    if (node === null) {
+        return false;
+    }
+
+    if (node.value === null) {
+        return false;
+    }
+    
+    if (node.value.id === target.parentId) {
+        node.addChild(new TaskNode(target));
+        return true;
+    }
+    
+    for (let child of node.children) {
+        if (searchInTree(child, target)) {
+            return true;
+        }
+    }
+    
+    return false;
+  }
+
+  const getDataFromDb = () => {
 
     let tasksObjectStore;
 
     const request = window.indexedDB.open("list-db", 1);
 
     request.onsuccess = (event) => {
-      console.log("onsuccess");
       const db = event.target.result;
 
       setDb(db)
-      console.log(db)
     
       tasksObjectStore = db
           .transaction("tasks", "readonly")
@@ -42,11 +90,10 @@ function App() {
         if (cursor) {
           const task = cursor.value;
     
-          addToTree(task);
+          addToTree(root, task);
           cursor.continue();
         }
         else {
-          console.log("No more entries!");
           console.log(root)
     
           sortTree(root)
@@ -87,33 +134,6 @@ function App() {
       }
     }
 
-    function addToTree(task) {
-
-      if (task.parentId === null) {
-        root.addChild(new TaskNode(task))
-      }
-      else {
-        searchInTree(root, task)
-      }
-    
-    }
-
-    function sortTree(node) {
-
-      if (node.value === undefined)
-        return;
-    
-      if(node.children.length === 0)
-        return;
-    
-      node.children.sort((a, b) => { return a.value.sortOrder - b.value.sortOrder} )
-    
-      for(let i = 0; i < node.children.length; i++) {
-        sortTree(node.children[i])
-      }
-    
-    }
-
     // function displayTree(node) {
 
     //   if (node === null) 
@@ -126,30 +146,6 @@ function App() {
     //   }
     // }
 
-
-    function searchInTree(node, target) {
-
-      if (node === null) {
-          return false;
-      }
-
-      if (node.value === null) {
-          return false;
-      }
-      
-      if (node.value.id === target.parentId) {
-          node.addChild(new TaskNode(target));
-          return true;
-      }
-      
-      for (let child of node.children) {
-          if (searchInTree(child, target)) {
-              return true;
-          }
-      }
-      
-      return false;
-    }
 
     request.onupgradeneeded = (event) => {
       console.log("onupgradeneeded");
@@ -177,11 +173,12 @@ function App() {
     request.onerror = (event) => {
       console.log("onerror");
     }
+  }
 
-    return () => {
-      console.log("cleanup")
-    }
 
+
+  useEffect(() => {
+    getDataFromDb()
   }, [])
 
   function onChange(task) {
@@ -217,10 +214,43 @@ function App() {
             }
             
           }}/>
-          <TreeList data = {taskRoot} onDelete={(taskId) => {
-            const updatedChildren = taskRoot.children.filter((value) => value.value.id !== taskId )
-            setTaskTreeRoot(new TaskNode(taskRoot.value, updatedChildren))
-          }}/>
+          <TreeList 
+            data = {taskRoot} 
+            onDelete={(taskId) => {
+              const updatedChildren = taskRoot.children.filter((value) => value.value.id !== taskId )
+              setTaskTreeRoot(new TaskNode(taskRoot.value, updatedChildren))
+            }}
+            onRefresh={() => {
+              // setTaskTreeRoot(new TaskNode(taskRoot.value, []))
+
+              const refreshedRoot = new TaskNode(new ItemClass(420, null, "Write something"));
+
+              
+              const tasksObjectStore = db
+                  .transaction("tasks", "readonly")
+                  .objectStore("tasks");
+
+    
+              tasksObjectStore.index("dateAdded").openCursor().onsuccess = (event) => {
+    
+              const cursor = event.target.result;
+              if (cursor) {
+                const task = cursor.value;
+          
+                addToTree(refreshedRoot, task);
+                cursor.continue();
+              }
+              else {
+                console.log(refreshedRoot)
+          
+                sortTree(refreshedRoot)
+                // root.addChild(new TaskNode(new ItemClass(generateUUID(), null, "Create task", root.children.length + 1)))
+
+                setTaskTreeRoot(refreshedRoot)
+              }
+            }
+            }}
+          />
 
         </DbContext.Provider>
 
