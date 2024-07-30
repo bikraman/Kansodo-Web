@@ -107,7 +107,6 @@ const ListItem = ({ taskNode, deleteTask, onDragFinished }) => {
     const db = useContext(DbContext);
 
     useEffect(() => {
-
         setNode(taskNode)
     }, [taskNode])
 

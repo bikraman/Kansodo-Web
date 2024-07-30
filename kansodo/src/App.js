@@ -3,6 +3,7 @@ import './App.css';
 import { useState, useEffect, useContext, createContext } from 'react';
 
 import TreeList from './components/TreeList';
+import DatePickerComponent from './components/datePicker';
 
 import TaskNode from './models/TaskNode'
 import ItemClass from './models/ItemClass';
@@ -10,6 +11,7 @@ import ItemClass from './models/ItemClass';
 import generateUUID from './util/UUIDUtils';
 
 export const DbContext = createContext()
+
 
 function App() {
 
@@ -249,6 +251,7 @@ function App() {
             }
             }}
           />
+          <DatePickerComponent/>
 
         </DbContext.Provider>
 
