@@ -80,11 +80,20 @@ input[type="checkbox"] {
   font-size: var(--list-item-text-size);
 }
 
+.list-item-due-date {
+  background-color: #66bb6a;
+  margin: 0px;
+  border-radius: 5px;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0px 8px 0px 8px;
+  font-size: 10px;
+}
+
 
 .list-item-text-area {
   flex-grow: 1;
   display: flex;
-
   align-items: center;
 }
 

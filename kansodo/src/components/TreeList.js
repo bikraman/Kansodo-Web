@@ -11,6 +11,7 @@ import generateUUID from '../util/UUIDUtils.js';
 import { DbContext } from '../App.js';
 
 import ListItem from './ListItem.js';
+import Arrow from './Arrow.js';
 import DatePickerComponent from './DatePicker.js';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 
@@ -25,10 +26,6 @@ export default function TreeList({data, onDelete, onRefresh}) {
         const rect = mainRef.current.getBoundingClientRect()
         // console.log(rect)
         const items = mainRef.current.getElementsByClassName("list-item")
-
-        // for (let item of items) {
-        //     console.log(item.getBoundingClientRect())
-        // }
 
         let tasksObjectStore = null
 
@@ -72,11 +69,9 @@ export default function TreeList({data, onDelete, onRefresh}) {
                 onRefresh()
                   
                 if (event.clientY > box.y + (box.height/2)) {
-                //   item.after(event.target)
                     onRefresh()
                 }
                 else if (event.clientY < box.y + (box.height/2)) {
-                //   item.before(event.target)
                     onRefresh()
                 }
               })
@@ -84,12 +79,15 @@ export default function TreeList({data, onDelete, onRefresh}) {
         }
     }
 
+    const [showCal, setShowCal] = useState(false)
+
     const items = data.children
                 .filter((element) => element.value.isVisible)
                 .map ((element) => 
                         <ListItem key = {element.value.id} taskNode={element} 
                             deleteTask={(taskId) => { onDelete(taskId)}} 
                             onDragFinished={onDragFinished}
+                            onShowCalendar={() => {setShowCal(true)}}
                             />
                     )
 
@@ -100,7 +98,13 @@ export default function TreeList({data, onDelete, onRefresh}) {
         }/>
     )
     
-    return (<div ref = {mainRef} className='list-container'>{items}</div>);
+    return (<div ref = {mainRef} className='list-container'>
+                {items}
+                {/* <div style={{position: 'fixed', left: '50%', top: '50%'}}>
+                    <DatePickerComponent onDateChange={(data) => {console.log(data)}}/>
+                </div> */}
+            </div>
+            );
 }
 
 
@@ -208,21 +212,14 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
-    const items = node.children.map ((element) => <ListItem key = {element.value.id }taskNode={element} deleteTask={(taskId) => {
-        setNode(new TaskNode(node.value, node.children.filter((value) => value.value.id !== taskId )))
-    }}/>)
-
     return (
         <div className="list-item-container" id={task.id}>
             <div className="list-item" draggable={true} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag} onDoubleClick={handleDoubleClick}>
-                {/* <Arrow doesHaveChildren={ node.children.length > 0 } isExpanded={isExpanded}/> */}
+                <Arrow doesHaveChildren={ node.children.length > 0 } isExpanded={isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />
                 <span className='list-item-text-area'>
                     <span style={{opacity: 0.5}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
                 </span>
-            </div>
-            <div className="list-item-child-holder" style={{ display: isExpanded ? 'block' : 'none' , marginLeft: '20px'}}>
-                {items}
             </div>
         </div>
     );

@@ -3,13 +3,16 @@ import { DbContext } from '../App.js';
 
 import generateUUID from '../util/UUIDUtils.js';
 
-import arrowCollapsed from '../assets/arrow_collapsed.png'
-import arrowExpanded from '../assets/arrow_expanded.png'
+
 
 import TaskNode from '../models/TaskNode.js'
 import ItemClass from '../models/ItemClass.js';
 
-export default function ListItem ({ taskNode, deleteTask, onDragFinished }) {
+import Arrow from './Arrow.js';
+
+import DatePickerComponent from './DatePicker.js';
+
+export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShowCalendar }) {
 
     const db = useContext(DbContext);
 
@@ -25,6 +28,10 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished }) {
     const [showMenu, setShowMenu] = useState(false)
     const [menuPosition, setMenuPosition] = useState({ xPos: 0, yPos: 0 });
 
+    const [showCalendar, setShowCalendar] = useState(false)
+
+    const [deadlineDate, setDeadlineDate] = useState(task.deadlineDate)
+ 
     const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
         setIsCompleted(event.target.checked)
@@ -158,7 +165,14 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished }) {
         }
         else if(menu === "addDueDate") {
             setShowMenu(false)
+            setShowCalendar(true)
+
         }
+    }
+
+    const setDeadline = (dateData) => {
+        console.log(dateData)
+        setDeadlineDate(`${dateData.$D}/${(dateData.$M) + 1}/${dateData.$y}`)
     }
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
@@ -179,8 +193,10 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished }) {
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
+                    <span className='list-item-due-date'><DueDate date={deadlineDate}/></span>
                     {/* <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span> */}
                 </span>
+                <DatePickerComponent shouldShow = {showCalendar} onDateChange={setDeadline}/>
                 {/* <span className="list-item-delete"><DatePickerComponent/></span> */}
                 {/* <span className="list-item-delete" onClick={handleDeleteClick}><img src={trash} alt="Delete"/> </span> */}
             </div>
@@ -197,13 +213,11 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished }) {
     );
 };
 
-const Arrow = ({ onClick, doesHaveChildren, isExpanded}) => {
-
-    if (isExpanded)
-        return <span onClick={onClick} style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowExpanded}/></span>
-    else
-        return <span onClick={onClick} style={{ visibility: doesHaveChildren ? 'visible' : 'hidden'}} className='list-item-arrow' ><img  src = {arrowCollapsed}/></span>
-};
+const DueDate = ({date}) => {
+    return <p style={{display: 'inline'}}>
+        {date}
+    </p>
+}
 
 const ContextMenu = ({ xPos, yPos, showMenu, onMenuItemClick }) => {
     if (!showMenu) {
