@@ -11,6 +11,7 @@ import ItemClass from '../models/ItemClass.js';
 import Arrow from './Arrow.js';
 
 import DatePickerComponent from './DatePicker.js';
+import RoundedCheckbox from './RoundedCheckbox.js'
 
 export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShowCalendar }) {
 
@@ -173,6 +174,7 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
     const setDeadline = (dateData) => {
         console.log(dateData)
         setDeadlineDate(`${dateData.$D}/${(dateData.$M) + 1}/${dateData.$y}`)
+        setShowCalendar(false)
     }
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
@@ -190,7 +192,9 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
         <div className="list-item-container" id={task.id} >
             <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag}>
                 <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
-                <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
+                
+                <span className='list-item-checkbox'><RoundedCheckbox/></span>
+                {/* <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                 */}
                 <span className='list-item-text-area'>
                     <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
                     <span className='list-item-due-date'><DueDate date={deadlineDate}/></span>
