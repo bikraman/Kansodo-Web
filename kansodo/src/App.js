@@ -3,7 +3,7 @@ import './App.css';
 import { useState, useEffect, useContext, createContext } from 'react';
 
 import TreeList from './components/TreeList';
-import DatePickerComponent from './components/datePicker';
+import DatePickerComponent from './components/DatePicker';
 
 import TaskNode from './models/TaskNode'
 import ItemClass from './models/ItemClass';
@@ -251,7 +251,6 @@ function App() {
             }
             }}
           />
-          <DatePickerComponent/>
 
         </DbContext.Provider>
 
