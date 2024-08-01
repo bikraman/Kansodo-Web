@@ -127,6 +127,20 @@ input[type="checkbox"] {
 
 }
 
+/* input[type='checkbox'].list-item-round-checkbox {
+  appearance: none;
+  border-radius: 50%;
+  border: 2px solid #141414;
+}
+
+input[type='checkbox'].list-item-round-checkbox:checked {
+  appearance: none;
+  border-radius: 50%;
+  font-size: medium;
+  border: 2px solid #141414;
+  background-color: #1e90ff;
+}
+
 .round {
   position: relative;
 }
@@ -168,6 +182,6 @@ input[type="checkbox"] {
 
 .round input[type="checkbox"]:checked + label:after {
   opacity: 1;
-}
+} */
 
 
