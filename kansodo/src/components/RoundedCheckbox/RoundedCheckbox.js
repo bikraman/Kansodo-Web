@@ -20,7 +20,6 @@ const RoundedCheckbox = ({ label, onChange, isChecked = false }) => {
         onChange={handleChange}
       />
       <span className="checkmark"></span>
-      {label && <span className="label">{label}</span>}
     </label>
   );
 };
