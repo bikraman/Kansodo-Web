@@ -1,5 +1,4 @@
 .rounded-checkbox {
-    background-color: aquamarine;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -26,7 +25,7 @@
 }
   
 .rounded-checkbox:hover input ~ .checkmark {
-    background-color: #ccc;
+    background-color: #ebebeb;
 }
   
 .rounded-checkbox input:checked ~ .checkmark {
@@ -45,7 +44,7 @@
   
 .rounded-checkbox .checkmark:after {
     left: 35%;
-    top: 15%;
+    top: 10%;
     width: 5px;
     height: 10px;
     border: solid rgb(255, 255, 255);
