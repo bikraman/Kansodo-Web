@@ -11,7 +11,8 @@ import ItemClass from '../models/ItemClass.js';
 import Arrow from './Arrow.js';
 
 import DatePickerComponent from './DatePicker.js';
-import RoundedCheckbox from './RoundedCheckbox/RoundedCheckbox.js'
+
+
 
 export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShowCalendar }) {
 
@@ -33,9 +34,10 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
 
     const [deadlineDate, setDeadlineDate] = useState(task.deadlineDate)
  
-    const handleCheckboxChange = (isChecked) => {
+    const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
-        setIsCompleted(isChecked)
+        console.log(event)
+        setIsCompleted(event.target.checked)
     };
 
     const handleTextChange = (event) => {
@@ -192,8 +194,6 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
         <div className="list-item-container" id={task.id} >
             <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag}>
                 <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
-                
-                {/* <RoundedCheckbox isChecked={isCompleted} onChange={handleCheckboxChange} /> */}
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>

@@ -1,26 +1,23 @@
 import React, { useState } from 'react';
-import './RoundedCheckbox.css';
+// import './RoundedCheckbox.css';
 
-const RoundedCheckbox = ({ label, onChange, isChecked = false }) => {
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import Checkbox from '@mui/material/Checkbox'
+
+const RoundedCheckbox = ({ onChange, isChecked = true }) => {
   const [checked, setChecked] = useState(isChecked);
 
   const handleChange = (event) => {
-    const newChecked = event.target.checked;
-    setChecked(newChecked);
-    if (onChange) {
-      onChange(newChecked);
-    }
+    console.log(event)
+    setChecked(event.target.checked);
   };
 
   return (
-    <label className="rounded-checkbox">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={handleChange}
-      />
-      <span className="checkmark"></span>
-    </label>
+    <Checkbox
+      checked={checked}
+      onChange={handleChange}
+    />
   );
 };
 

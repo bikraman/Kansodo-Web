@@ -14,7 +14,6 @@ import ListItem from './ListItem.js';
 import Arrow from './Arrow.js';
 import DatePickerComponent from './DatePicker.js';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import RoundedCheckbox from './RoundedCheckbox/RoundedCheckbox.js';
 
 
 export default function TreeList({data, onDelete, onRefresh}) {
