@@ -5,18 +5,21 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import Checkbox from '@mui/material/Checkbox'
 
-const RoundedCheckbox = ({ onChange, isChecked = true }) => {
+const RoundedCheckbox = ({ onChange, isChecked = false }) => {
   const [checked, setChecked] = useState(isChecked);
 
-  const handleChange = (event) => {
+  const handleCheckboxChange = (event) => {
     console.log(event)
-    setChecked(event.target.checked);
-  };
+  }
+  
 
   return (
     <Checkbox
       checked={checked}
-      onChange={handleChange}
+      icon={<RadioButtonUncheckedIcon/>}
+      checkedIcon={<CheckCircleIcon/>}
+      onChange={handleCheckboxChange}
+      defaultChecked
     />
   );
 };

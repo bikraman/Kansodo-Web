@@ -11,6 +11,10 @@ import ItemClass from '../models/ItemClass.js';
 import Arrow from './Arrow.js';
 
 import DatePickerComponent from './DatePicker.js';
+import { Checkbox } from '@mui/material';
+
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 
 
@@ -36,8 +40,35 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
  
     const handleCheckboxChange = (event) => {
         // Logic to handle checkbox change
-        console.log(event)
-        setIsCompleted(event.target.checked)
+        console.log(event.target.checked)
+
+        const tasksObjectStore = db.db
+                .transaction("tasks", "readwrite")
+                .objectStore("tasks");
+
+        const changeCompletion = new Promise((resolve, reject) => {
+            
+            const existingTaskRequest = tasksObjectStore.get(task.id)
+
+            existingTaskRequest.onsuccess = (event) => {
+                resolve(event.target.result)
+            }
+
+        }).then((existingTask) => {
+
+            existingTask.isCompleted = !isCompleted
+
+            const requestUpdate = tasksObjectStore.put(existingTask);
+
+            requestUpdate.onsuccess = () => {
+                console.log("update success")
+                setIsCompleted(!isCompleted)
+            }
+            
+            requestUpdate.onerror = (event) => {
+                console.log(event)
+            }
+        }) 
     };
 
     const handleTextChange = (event) => {
@@ -194,6 +225,12 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
         <div className="list-item-container" id={task.id} >
             <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag}>
                 <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
+                {/* <Checkbox 
+                    style={{padding: '1px'}}
+                    icon={<RadioButtonUncheckedIcon/>}
+                    checkedIcon={<CheckCircleIcon/>} 
+                    checked={isCompleted} 
+                    onChange={handleCheckboxChange}/> */}
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
                     <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
