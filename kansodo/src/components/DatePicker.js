@@ -18,7 +18,15 @@ export default function DatePickerComponent({shouldShow, onDateChange}) {
     if (showCal)
         return (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <div style={{position: 'fixed', left: '50%', top: '50%'}}>
+                <div style={{position: 'fixed' , 
+                    top: '0',
+                    left: '0',
+                    alignItems: 'center',
+
+                    zIndex: '10' ,
+                    display: 'flex', 
+                    width: '100%',
+                    height: '100%'}}>
                     <DateCalendar 
                         sx={{
                             backgroundColor: 'white',
