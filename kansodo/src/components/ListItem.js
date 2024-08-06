@@ -205,9 +205,19 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
     }
 
     const setDeadline = (dateData) => {
-        console.log(dateData)
-        setDeadlineDate(`${dateData.$D}/${(dateData.$M) + 1}/${dateData.$y}`)
-        setShowCalendar(false)
+        console.log(dateData.$d)
+        console.log(new Date())
+    
+
+        const tasksObjectStore = db.db.transaction("tasks", "readwrite").objectStore("tasks")
+
+        task.deadlineDate = dateData.$d
+
+        tasksObjectStore.put(task).onsuccess = () => {
+            // setDeadlineDate(`${dateData.$D}/${(dateData.$M) + 1}/${dateData.$y}`)
+            setDeadlineDate(dateData.$d)
+            setShowCalendar(false)
+        }
     }
 
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
@@ -223,7 +233,7 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
 
     return (
         <div className="list-item-container" id={task.id} >
-            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag = {handleDrag}>
+            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag={handleDrag} onBlur={() => console.log("focus out")}>
                 <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 {/* <Checkbox 
                     style={{padding: '1px'}}
@@ -255,9 +265,17 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
 };
 
 const DueDate = ({date}) => {
-    return <p style={{display: 'inline'}}>
-        {date}
-    </p>
+
+    if (date !== null) {
+
+        const d = date;
+        const m = d.getMonth();
+        const ds = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
+
+        return <p style={{display: 'inline'}}>
+            {ds}
+        </p>
+    }
 }
 
 const ContextMenu = ({ xPos, yPos, showMenu, onMenuItemClick }) => {
