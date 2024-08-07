@@ -81,13 +81,14 @@ input[type="checkbox"] {
 }
 
 .list-item-due-date {
-  background-color: #66bb6a;
   margin: 0px;
   border-radius: 5px;
+  border: 1px solid black;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0px 8px 0px 8px;
-  font-size: 10px;
+  color: black;
+  font-size: 12px;
 }
 
 

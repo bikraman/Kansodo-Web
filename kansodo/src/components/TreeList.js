@@ -18,7 +18,8 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 
 export default function TreeList({data, onDelete, onRefresh}) {
 
-    const db = useContext(DbContext).db
+    const dbContext = useContext(DbContext)
+    const db = dbContext.db
 
     const mainRef = useRef(null)
 
@@ -91,11 +92,30 @@ export default function TreeList({data, onDelete, onRefresh}) {
                             />
                     )
 
+    function addTask(taskText) {
+
+        const position = data.children.length
+        console.log(position)
+
+        const task = new ItemClass(generateUUID(), null, taskText, position);
+    
+        const store = db.transaction("tasks", "readwrite").objectStore("tasks");
+
+        store.add(task)
+
+        store.transaction.oncomplete = () => {
+            console.log(task)
+            dbContext.onChange(task)
+        }
+
+    }
+
     items.push(
-        <CreateTaskListItem key = {generateUUID()} taskNode={new TaskNode(new ItemClass(generateUUID(), null, "Create task", 1))} deleteTask={(taskId) => {
-                onDelete(taskId)
-            }
-        }/>
+        <CreateTaskListItem 
+            key = {generateUUID()} 
+            taskNode={new TaskNode(new ItemClass(generateUUID(), null, "Create task", 1))}
+            onAddTask = {addTask}
+        />
     )
     
     return (<div ref = {mainRef} className='list-container'>
@@ -109,7 +129,7 @@ export default function TreeList({data, onDelete, onRefresh}) {
 
 
 
-const CreateTaskListItem = ({ taskNode, deleteTask }) => {
+const CreateTaskListItem = ({ taskNode, onAddTask }) => {
 
     const db = useContext(DbContext);
 
@@ -128,17 +148,7 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
 
         if (event.code === "Enter") {
 
-            const task = new ItemClass(generateUUID(), null, taskText, 0);
-            console.log(db.db)
-    
-            const store = db.db.transaction("tasks", "readwrite").objectStore("tasks");
-    
-            store.add(task)
-    
-            store.transaction.oncomplete = () => {
-                console.log(task)
-                db.onChange(task)
-            }
+            onAddTask(taskText)
 
             event.preventDefault();
 
@@ -166,27 +176,6 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
         console.log(event);
     };
 
-    const handleDeleteClick = (event) => {
-        // Logic to handle delete click
-        console.log(`delete ${task.id}`);
-        deleteTask(task.id)
-
-        const tasksObjectStore = db.db.transaction("tasks", "readwrite").objectStore("tasks")
-        const tagIndex = tasksObjectStore.index("parentId")
-        tasksObjectStore.delete(task.id);
-        var pdestroy = tagIndex.openKeyCursor(); 
-        pdestroy.onsuccess = function(event) {
-            const cursor = event.target.result;
-            if (cursor) {
-
-                if(cursor.key === task.id) {
-                    console.log(cursor.key)
-                    tasksObjectStore.delete(cursor.primaryKey);
-                }
-                cursor.continue();
-            }
-        }
-    };
 
     const handleAddSubTaskDoubleClick = (event) => {
         event.stopPropagation();
@@ -210,6 +199,37 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
         }
     };
 
+    const inputRef = useRef(null)
+    const [isFocused, setIsFocused] = useState(false)
+
+    // useEffect(() => {
+    //     takeCursorToZero();
+    // }, [isFocused])
+
+    function onFocus() {
+        setIsFocused(true)
+        console.log(isFocused)
+        takeCursorToZero();
+    }
+
+    function takeCursorToZero() {
+
+        const element = inputRef.current
+        element.focus()
+        const range = document.createRange();
+        const selection = window.getSelection();
+        
+        range.setStart(element, 0);
+        range.collapse(true);
+        
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        console.log(range)
+
+
+    }
+
     const [isCompleted, setIsCompleted] = useState(task.isCompleted)
 
     return (
@@ -218,7 +238,7 @@ const CreateTaskListItem = ({ taskNode, deleteTask }) => {
                 <Arrow doesHaveChildren={ node.children.length > 0 } isExpanded={isExpanded}/>
                 <input type="checkbox" className="list-item-checkbox"  disabled = {true} checked={isCompleted} onChange={handleCheckboxChange} />
                 <span className='list-item-text-area'>
-                    <span style={{opacity: 0.5}} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
+                    <span style={{opacity: 0.5}} ref={inputRef} className="list-item-text" contentEditable={true} onKeyDown={handleTextChange} onClick={onFocus} onInput={(event) => { setTaskText(event.target.textContent)} }>{task.data}</span>
                 </span>
             </div>
         </div>

@@ -3,8 +3,6 @@ import { DbContext } from '../App.js';
 
 import generateUUID from '../util/UUIDUtils.js';
 
-
-
 import TaskNode from '../models/TaskNode.js'
 import ItemClass from '../models/ItemClass.js';
 
@@ -75,8 +73,18 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
         // Logic to handle text change
 
         if (event.code === "Enter") {
+            saveText();
+            event.preventDefault();
+        }
+    };
 
-            const tasksObjectStore = db.db.transaction("tasks", "readwrite").objectStore("tasks");
+    const handleFocusOut = () => {
+
+        saveText();
+    }
+
+    function saveText() {
+        const tasksObjectStore = db.db.transaction("tasks", "readwrite").objectStore("tasks");
 
             const existingTaskRequest = tasksObjectStore.get(task.id)
             existingTaskRequest.onsuccess = (event) => {
@@ -98,9 +106,7 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
             existingTaskRequest.onerror = (event) => {
                 console.log(event)
             }
-            event.preventDefault();
-        }
-    };
+    } 
 
     const handleExpandCollapse = (event) => {
         // Logic to handle double click
@@ -233,7 +239,7 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
 
     return (
         <div className="list-item-container" id={task.id} >
-            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag={handleDrag} onBlur={() => console.log("focus out")}>
+            <div className="list-item" draggable={true} onContextMenu={handleRightClick} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDrag={handleDrag} onBlur={handleFocusOut}>
                 <Arrow onClick={handleExpandCollapse} doesHaveChildren = { node.children.length > 0 } isExpanded = {isExpanded}/>
                 {/* <Checkbox 
                     style={{padding: '1px'}}
@@ -243,8 +249,8 @@ export default function ListItem ({ taskNode, deleteTask, onDragFinished, onShow
                     onChange={handleCheckboxChange}/> */}
                 <input type="checkbox" className="list-item-checkbox" checked={isCompleted} onChange={handleCheckboxChange} />                
                 <span className='list-item-text-area'>
-                    <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }>{task.data}</span>
-                    <span className='list-item-due-date'><DueDate date={deadlineDate}/></span>
+                    <span style = {{textDecoration: isCompleted? 'line-through' : 'none'}} className="list-item-text" suppressContentEditableWarning={true} contentEditable={true} onKeyDown={handleTextChange} onInput={(event) => { setTaskText(event.target.textContent) } }><p spellCheck={false} style={{display: 'inline'}}>{task.data}</p></span>
+                    <span className='list-item-due-date' style={{visibility: deadlineDate === null? 'hidden': 'visible'}}><DueDate date={deadlineDate}/></span>
                     {/* <span className="list-item-add-subtask" onClick={handleAddSubTaskClick} onDoubleClick={handleAddSubTaskDoubleClick}><img src={plus} alt="Add Subtask" /></span> */}
                 </span>
                 <DatePickerComponent shouldShow = {showCalendar} onDateChange={setDeadline}/>
@@ -272,9 +278,11 @@ const DueDate = ({date}) => {
         const m = d.getMonth();
         const ds = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
 
-        return <p style={{display: 'inline'}}>
-            {ds}
-        </p>
+        return <span>
+                <p style={{display: 'inline'}}>
+                    {ds}
+                </p>
+            </span>
     }
 }
 
@@ -296,7 +304,7 @@ const ContextMenu = ({ xPos, yPos, showMenu, onMenuItemClick }) => {
           padding: 0,
           margin: 0,
           zIndex: 999,
-        //   boxShadow: '0px 0px 10px rgba(0,0,0,0.5)'
+          boxShadow: '0px 0px 10px rgba(0,0,0,0.5)'
         }}
       >
         <li onClick={() => onMenuItemClick('delete')} style={{ padding: '8px', cursor: 'pointer' }}>Delete</li>
